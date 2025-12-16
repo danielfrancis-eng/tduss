@@ -23,7 +23,7 @@
       <!-- Removed Activities / Workspace / Focus from top menu -->
       <div class="ml-auto flex items-center gap-2">
         <button class="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm hover:bg-zinc-50 flex items-center gap-2"
-          title="Profile (mock)" aria-label="Profile">
+          title="Profile" aria-label="Profile">
           <span class="w-4 h-4 inline-block" id="icoUser"></span>
           <span class="hidden sm:inline">Profile</span>
         </button>
@@ -126,7 +126,7 @@
             <div class="flex items-center justify-between mb-2">
               <div class="text-xs font-semibold text-zinc-500">UPCOMING • click to open details</div>
               <button id="btnRefresh" class="rounded-xl border border-zinc-200 bg-white px-2.5 py-1.5 text-xs hover:bg-zinc-50"
-                title="Refresh list (mock)">Refresh</button>
+                title="Refresh list">Refresh</button>
             </div>
             <div id="activityList" class="space-y-2"></div>
             <div class="mt-2 text-[11px] text-zinc-500">
@@ -150,7 +150,7 @@
                   </div>
                   <div id="actMeta" class="text-xs text-zinc-500 mt-1">—</div>
                 </div>
-                <div class="text-xs font-semibold px-2 py-1 rounded-lg bg-zinc-50 border border-zinc-200 text-zinc-700" title="Status (mock)">Open</div>
+                <div class="text-xs font-semibold px-2 py-1 rounded-lg bg-zinc-50 border border-zinc-200 text-zinc-700" title="Status">Open</div>
               </div>
 
               <!-- Details menu options -->
@@ -166,7 +166,7 @@
                 <button id="btnActAskAI" class="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm hover:bg-zinc-50"
                   title="Ask AI to summarize + recommend next best actions">Ask AI</button>
                 <button id="btnActQuickAction" class="rounded-xl bg-[#FDE047] px-3 py-2 text-sm font-semibold hover:brightness-95"
-                  title="Mock action (e.g., schedule follow-up)">Action</button>
+                  title="Action (e.g., schedule follow-up)">Action</button>
               </div>
               <div class="mt-2 text-[11px] text-zinc-500">
                 Helpful tip: Great next steps are specific—owner + due date + expected customer outcome.
@@ -236,7 +236,7 @@
 
             <button id="btnConnectIntegration"
               class="mt-3 w-full rounded-2xl bg-[#FDE047] px-4 py-3 text-sm font-semibold hover:brightness-95"
-              title="Choose your CRM (mock)">Connect integration</button>
+              title="Choose your CRM">Connect integration</button>
 
             <div class="mt-2 text-[11px] text-zinc-500">
               Tip: Start with your CRM, then add product usage + support tickets for better health scoring.
@@ -325,7 +325,7 @@
               <div class="text-sm font-semibold">Customer List</div>
               <div class="text-xs text-zinc-500">Search → click a customer to open detail</div>
             </div>
-            <div class="text-[11px] font-semibold px-2 py-1 rounded-lg bg-zinc-50 border border-zinc-200 text-zinc-700" title="Mock dataset">
+            <div class="text-[11px] font-semibold px-2 py-1 rounded-lg bg-zinc-50 border border-zinc-200 text-zinc-700" title="Dataset">
               8 customers
             </div>
           </div>
@@ -390,14 +390,14 @@
               <div class="text-sm font-semibold">Dashboard</div>
               <div class="text-xs text-zinc-500">CSM KPIs + widgets</div>
             </div>
-            <button id="btnDashPrompt" class="rounded-xl bg-[#FDE047] px-3 py-2 text-sm font-semibold hover:brightness-95" title="Create widget from a prompt (mock)">+</button>
+            <button id="btnDashPrompt" class="rounded-xl bg-[#FDE047] px-3 py-2 text-sm font-semibold hover:brightness-95" title="Create widget from a prompt">+</button>
           </div>
 
           <div id="dashPromptWrap" class="hidden mt-3">
             <input id="dashPrompt" class="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#FDE047]"
               placeholder="Type a widget prompt (e.g., 'Show churn risk trend by segment')" />
             <button id="btnCreateWidget" class="mt-2 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm hover:bg-zinc-50">
-              Create widget (mock)
+              Create widget 
             </button>
           </div>
 
@@ -405,13 +405,13 @@
             <div class="rounded-2xl border border-zinc-200 bg-white p-3">
               <div class="text-xs font-semibold text-zinc-500">TOTAL ARR</div>
               <div class="mt-2 text-2xl font-semibold">€1,240,000</div>
-              <div class="text-xs text-zinc-500 mt-1">Revenue tracked across active contracts (mock)</div>
+              <div class="text-xs text-zinc-500 mt-1">Revenue tracked across active contracts</div>
             </div>
 
             <div class="rounded-2xl border border-zinc-200 bg-white p-3">
               <div class="text-xs font-semibold text-zinc-500">TOTAL MRR</div>
               <div class="mt-2 text-2xl font-semibold">€103,333</div>
-              <div class="text-xs text-zinc-500 mt-1">Useful for week-to-week CS health (mock)</div>
+              <div class="text-xs text-zinc-500 mt-1">Useful for week-to-week CS health</div>
             </div>
 
             <div class="rounded-2xl border border-zinc-200 bg-white p-3">
@@ -442,7 +442,7 @@
             <div class="rounded-2xl border border-zinc-200 bg-white p-3">
               <div class="flex items-center justify-between">
                 <div>
-                  <div class="text-xs font-semibold text-zinc-500">CHURN RISK INDEX (MOCK)</div>
+                  <div class="text-xs font-semibold text-zinc-500">CHURN RISK INDEX</div>
                   <div class="text-[11px] text-zinc-500 mt-1">Lower is better • derived from activity + health signals</div>
                 </div>
                 <button id="btnRegenLine" class="rounded-xl border border-zinc-200 bg-white px-2.5 py-1.5 text-xs hover:bg-zinc-50">Regenerate</button>
@@ -659,7 +659,7 @@
           <div class="text-sm font-mono text-zinc-700"><span id="recordTimer">00:00</span></div>
         </div>
         <div class="rounded-2xl border border-zinc-200 bg-white p-3">
-          <div class="text-xs font-semibold text-zinc-500">Live transcript preview (mock)</div>
+          <div class="text-xs font-semibold text-zinc-500">Live transcript preview</div>
           <pre id="recordText" class="mt-2 whitespace-pre-wrap text-sm text-zinc-700 bg-zinc-50 border border-zinc-200 rounded-xl p-3 h-40 overflow-auto">[00:00] You: Starting now…
 [00:03] Customer: Yep, go ahead…
 [00:06] You: Today we’ll cover adoption + renewal timeline…</pre>
@@ -814,12 +814,12 @@
         if (type === "meeting") {
           base.transcript = hasTranscript;
           base.meetingData = {
-            summary: hasTranscript ? "Mock summary: risks + next steps." : "Reviewed adoption, blockers, and owners (mock).",
-            notes: ["Next steps agreed (mock)","Owner assigned (mock)"],
-            transcriptText: hasTranscript ? "[00:00] Speaker: mock transcript...\n[00:10] Speaker: more text...\n" : ""
+            summary: hasTranscript ? "Summary: risks + next steps." : "Reviewed adoption, blockers, and owners.",
+            notes: ["Next steps agreed","Owner assigned"],
+            transcriptText: hasTranscript ? "[00:00] Speaker: transcript...\n[00:10] Speaker: more text...\n" : ""
           };
         } else {
-          base.noteText = "Mock note to capture account context (risk, stakeholder, outcomes).";
+          base.noteText = "Note to capture account context (risk, stakeholder, outcomes).";
         }
 
         activities.push(base);
@@ -1198,7 +1198,7 @@
     // Dashboard prompt
     const dashPromptWrap = document.getElementById("dashPromptWrap");
     document.getElementById("btnDashPrompt").addEventListener("click", () => dashPromptWrap.classList.toggle("hidden"));
-    document.getElementById("btnCreateWidget").addEventListener("click", () => toast("Widget created (mock)."));
+    document.getElementById("btnCreateWidget").addEventListener("click", () => toast("Widget created."));
 
     // -----------------------------
     // Recommendations rendering
@@ -1230,7 +1230,7 @@
           <div class="mt-3 flex flex-wrap gap-2">
             <button class="recAction rounded-xl bg-[#FDE047] px-3 py-2 text-xs font-semibold hover:brightness-95"
               data-scope="${scope}" data-id="${rec.id}" data-act="${escapeHtml(rec.primary.type)}"
-              title="Start the action (mock)">
+              title="Start the action">
               ${escapeHtml(rec.primary.label)}
             </button>
             <button class="recAskAI rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs hover:bg-zinc-50"
@@ -1360,7 +1360,7 @@
     function renderActionView() {
       if (!actionContext) return;
       actionTitle.textContent = actionContext.title;
-      actionMeta.textContent = `${actionContext.companyName} • ${actionContext.primaryAction.toUpperCase()} • (mock action form)`;
+      actionMeta.textContent = `${actionContext.companyName} • ${actionContext.primaryAction.toUpperCase()} • (Action form)`;
 
       const type = actionContext.primaryAction;
       const base = `
@@ -1372,7 +1372,7 @@
 
       let form = `
         <div class="rounded-xl border border-zinc-200 bg-white p-2">
-          <div class="text-xs font-semibold text-zinc-500">Action (mock)</div>
+          <div class="text-xs font-semibold text-zinc-500">Action</div>
           <div class="mt-2 text-sm text-zinc-700">
             This is a placeholder action UI for: <span class="font-semibold">${escapeHtml(type)}</span>
           </div>
@@ -1397,7 +1397,7 @@
     });
 
     btnActionDone.addEventListener("click", () => {
-      toast("Marked done (mock).");
+      toast("Marked done.");
       if (lastRightView === "customerDetail") openCustomerDetailView();
       else setRightTab(lastRightView || "customers");
     });
@@ -1408,7 +1408,7 @@
     function renderContracts(companyId) {
       const rows = (contractsByCustomer[companyId] || []);
       if (!rows.length) {
-        custContracts.innerHTML = `<div class="p-3 text-sm text-zinc-600 bg-zinc-50">No contracts found (mock).</div>`;
+        custContracts.innerHTML = `<div class="p-3 text-sm text-zinc-600 bg-zinc-50">No contracts found.</div>`;
         return;
       }
       custContracts.innerHTML = `
@@ -1604,7 +1604,7 @@
           body = `
             <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-2">
               <div class="text-xs font-semibold text-zinc-500">Meeting overview</div>
-              <div class="mt-1 text-sm text-zinc-700">${escapeHtml(a.meetingData?.summary || "(mock) Meeting captured.")}</div>
+              <div class="mt-1 text-sm text-zinc-700">${escapeHtml(a.meetingData?.summary || "Meeting captured.")}</div>
               <div class="mt-2 text-xs text-zinc-500">${a.transcript ? "Transcript available." : "No transcript captured yet."}</div>
             </div>
           `;
@@ -1612,7 +1612,7 @@
           body = `
             <div class="rounded-xl border border-zinc-200 bg-white p-2">
               <div class="text-xs font-semibold text-zinc-500">Note overview</div>
-              <div class="mt-2 text-sm text-zinc-700">${escapeHtml(a.noteText || "(mock) No note text.")}</div>
+              <div class="mt-2 text-sm text-zinc-700">${escapeHtml(a.noteText || "No note text.")}</div>
             </div>
           `;
         }
@@ -1623,7 +1623,7 @@
             <div class="rounded-xl border border-zinc-200 bg-white p-2">
               <div class="text-xs font-semibold text-zinc-500">Meeting notes</div>
               <div class="mt-2 grid gap-2">
-                ${(notes.length ? notes : ["(mock) No notes yet."]).map(n => `
+                ${(notes.length ? notes : ["No notes yet."]).map(n => `
                   <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-2 text-sm text-zinc-700">${escapeHtml(n)}</div>
                 `).join("")}
               </div>
@@ -1633,7 +1633,7 @@
           body = `
             <div class="rounded-xl border border-zinc-200 bg-white p-2">
               <div class="text-xs font-semibold text-zinc-500">Notes</div>
-              <div class="mt-2 text-sm text-zinc-700">${escapeHtml(a.noteText || "(mock) No notes.")}</div>
+              <div class="mt-2 text-sm text-zinc-700">${escapeHtml(a.noteText || "No notes.")}</div>
               <div class="mt-2 text-xs text-zinc-500">Tip: Keep notes outcome-based: risk, impact, next step.</div>
             </div>
           `;
@@ -1643,7 +1643,7 @@
           body = `
             <div class="rounded-xl border border-zinc-200 bg-white p-2">
               <div class="text-xs font-semibold text-zinc-500">Transcript</div>
-              <pre class="mt-2 whitespace-pre-wrap text-sm text-zinc-700 bg-zinc-50 border border-zinc-200 rounded-xl p-3 max-h-56 overflow-auto">${escapeHtml(a.meetingData?.transcriptText || "(mock) Transcript missing.")}</pre>
+              <pre class="mt-2 whitespace-pre-wrap text-sm text-zinc-700 bg-zinc-50 border border-zinc-200 rounded-xl p-3 max-h-56 overflow-auto">${escapeHtml(a.meetingData?.transcriptText || "( ) Transcript missing.")}</pre>
               <div class="mt-2 text-[11px] text-zinc-500">Tip: Ask AI to extract risks + action items from transcripts.</div>
             </div>
           `;
@@ -1675,7 +1675,7 @@
     document.getElementById("btnActQuickAction").addEventListener("click", () => {
       const a = activities.find(x => x.id === currentActivityId);
       if (!a) return;
-      toast(`Action (mock) for: ${a.title}`);
+      toast(`Action for: ${a.title}`);
     });
 
     // -----------------------------
@@ -1733,9 +1733,9 @@
 
       if (type === "meeting") {
         base.transcript = false;
-        base.meetingData = { summary: details || "(mock) Meeting created.", notes: [], transcriptText:"" };
+        base.meetingData = { summary: details || "Meeting created.", notes: [], transcriptText:"" };
       } else {
-        base.noteText = details || "(mock) Note created.";
+        base.noteText = details || "Note created.";
       }
 
       activities.unshift(base);
@@ -1795,16 +1795,16 @@
           when,
           transcript:true,
           meetingData:{
-            summary:"(mock) Recorded call saved. Key points captured from transcript preview.",
+            summary:"( ) Recorded call saved. Key points captured from transcript preview.",
             notes:["Customer asked for ROI proof","QBR requested for next week","Renewal owner needs confirmation"],
             transcriptText
           }
         });
 
         renderActivities();
-        toast("Transcription ended → saved meeting with transcript (mock).");
+        toast("Transcription ended → saved meeting with transcript ( ).");
       } else {
-        toast("Transcription ended (mock).");
+        toast("Transcription ended ( ).");
       }
     }
 
@@ -1836,16 +1836,16 @@
       let reply = `Got it. For ${c.name}, next steps: clarify outcome, confirm owners, set dates, and schedule the next touchpoint.`;
 
       if (msg.includes("churn") || msg.includes("risk")) {
-        reply = `Churn risk check for ${c.name} (mock):\n- Confirm renewal owner + timeline\n- Validate adoption KPI + current usage\n- Schedule exec sponsor sync\n\nNext best action: schedule a 20-min renewal process call and send a recap with owners + dates.`;
+        reply = `Churn risk check for ${c.name} ( ):\n- Confirm renewal owner + timeline\n- Validate adoption KPI + current usage\n- Schedule exec sponsor sync\n\nNext best action: schedule a 20-min renewal process call and send a recap with owners + dates.`;
       } else if (msg.includes("renewal")) {
-        reply = `Renewal prep for ${c.name} (mock):\n1) Confirm renewal process + stakeholders\n2) Summarize delivered outcomes\n3) Align next-quarter success plan\n\nNext best action: draft a renewal timeline email and request a decision date.`;
+        reply = `Renewal prep for ${c.name} ( ):\n1) Confirm renewal process + stakeholders\n2) Summarize delivered outcomes\n3) Align next-quarter success plan\n\nNext best action: draft a renewal timeline email and request a decision date.`;
       } else if (msg.includes("transcript")) {
         const last = activities
           .filter(a => a.company === companyId && a.type === "meeting" && a.transcript)
           .sort((a,b) => new Date(b.when) - new Date(a.when))[0];
         reply = last
-          ? `Latest transcript: "${last.title}". Summary: ${(last.meetingData?.summary || "(mock) pending.")}\n\nSuggested action: send recap + schedule QBR.`
-          : `No transcripts found yet for ${c.name}. Use Start 🎙️ in Activities to capture one (mock).`;
+          ? `Latest transcript: "${last.title}". Summary: ${(last.meetingData?.summary || "( ) pending.")}\n\nSuggested action: send recap + schedule QBR.`
+          : `No transcripts found yet for ${c.name}. Use Start 🎙️ in Activities to capture one ( ).`;
       } else if (msg.includes("upcoming")) {
         const list = activities
           .filter(a => a.company === companyId)
@@ -1973,7 +1973,7 @@
           </div>
           <div class="text-xs font-black text-emerald-700" title="AI Health">${c.ai}</div>
         </div>
-      `).join("") || `<div class="text-sm text-zinc-600 rounded-xl border border-zinc-200 bg-zinc-50 p-3">No high-touch customers (mock).</div>`;
+      `).join("") || `<div class="text-sm text-zinc-600 rounded-xl border border-zinc-200 bg-zinc-50 p-3">No high-touch customers ( ).</div>`;
     }
 
     function rand(min, max){ return Math.random() * (max - min) + min; }
@@ -2122,7 +2122,7 @@
         `;
         chatInput.value = "";
         chatInput.disabled = true;
-        chatInput.placeholder = "Connect an integration to enable chat (mock).";
+        chatInput.placeholder = "Connect an integration to enable chat ( ).";
         chatSub.textContent = "Settings mode: connect your CRM to populate the workspace.";
 
         openRightExpanded();
@@ -2204,7 +2204,7 @@
     async function startImport(crmName) {
       integrationPicker.classList.add("hidden");
       importProgress.classList.remove("hidden");
-      importMeta.textContent = `${crmName} • Import pipeline running (mock)`;
+      importMeta.textContent = `${crmName} • Import pipeline running ( )`;
       importBadge.textContent = "Running";
       importBadge.className = "text-[11px] font-semibold px-2 py-1 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-800";
       btnImportDone.classList.add("hidden");
@@ -2226,7 +2226,7 @@
       importBadge.textContent = "Complete";
       importBadge.className = "text-[11px] font-semibold px-2 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700";
       btnImportDone.classList.remove("hidden");
-      toast("Import complete (mock).");
+      toast("Import complete ( ).");
     }
 
     btnImportDone.addEventListener("click", () => {
