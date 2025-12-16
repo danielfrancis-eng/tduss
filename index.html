@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VENMATE Slim — Drawers</title>
+  <title>TDUSS</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
@@ -13,10 +13,10 @@
   <header class="sticky top-0 z-50 border-b border-zinc-200 bg-white/90 backdrop-blur">
     <div class="w-full px-4 py-3 flex items-center gap-3">
       <div class="flex items-center gap-2">
-        <div class="h-8 w-8 rounded-xl bg-[#FDE047] grid place-items-center font-black">V</div>
+        <div class="h-8 w-8 rounded-xl bg-[#FDE047] grid place-items-center font-black">T</div>
         <div>
-          <div class="font-semibold leading-tight">VENMATE</div>
-          <div class="text-xs text-zinc-500 leading-tight">Slim workspace (chat focus + drawers)</div>
+          <div class="font-semibold leading-tight">TDUSS</div>
+          <div class="text-xs text-zinc-500 leading-tight">workspace (chat focus + drawers)</div>
         </div>
       </div>
 
@@ -284,7 +284,7 @@
               title="Finish and return to workspace">Done</button>
 
             <div class="mt-2 text-[11px] text-zinc-500">
-              Pipeline stages: Step 1 Company • Step 2 Opportunities/Deals (grouped by company) • Step 3 Contacts (backfill) • Activities (up to 180 days: meetings, notes)
+              Pipeline stages: Step 1 Company • Step 2 Opportunities/Deals • Step 3 Contacts • Activities
             </div>
           </div>
         </div>
@@ -2213,7 +2213,7 @@
         { label:"Step 1: Company", desc:"Import companies/accounts and normalize identifiers." },
         { label:"Step 2: Opportunities / Deals", desc:"Import deals and group them by company for pipeline visibility." },
         { label:"Step 3: Contact", desc:"Backfill contacts from opportunities and companies." },
-        { label:"Activities (last 180 days)", desc:"Import Meetings and Notes to power CS workflows." },
+        { label:"Activities", desc:"Import Meetings and Notes to power CS workflows." },
       ];
 
       importSteps.innerHTML = steps.map(s => stepRow(s.label, s.desc)).join("");
