@@ -1,0 +1,2275 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VENMATE Slim — Drawers</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-zinc-100 text-zinc-900">
+  <!-- Top bar (sticky, no overlaps) -->
+  <header class="sticky top-0 z-50 border-b border-zinc-200 bg-white/90 backdrop-blur">
+    <div class="w-full px-4 py-3 flex items-center gap-3">
+      <div class="flex items-center gap-2">
+        <div class="h-8 w-8 rounded-xl bg-[#FDE047] grid place-items-center font-black">V</div>
+        <div>
+          <div class="font-semibold leading-tight">VENMATE</div>
+          <div class="text-xs text-zinc-500 leading-tight">Slim workspace (chat focus + drawers)</div>
+        </div>
+      </div>
+
+      <!-- Removed Activities / Workspace / Focus from top menu -->
+      <div class="ml-auto flex items-center gap-2">
+        <button class="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm hover:bg-zinc-50 flex items-center gap-2"
+          title="Profile (mock)" aria-label="Profile">
+          <span class="w-4 h-4 inline-block" id="icoUser"></span>
+          <span class="hidden sm:inline">Profile</span>
+        </button>
+
+        <button id="btnSettings"
+          class="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm hover:bg-zinc-50 flex items-center gap-2"
+          title="Settings (connect CRM)" aria-label="Settings">
+          <span class="w-4 h-4 inline-block" id="icoSettings"></span>
+          <span class="hidden sm:inline">Settings</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- PAGE -->
+  <main class="relative w-full">
+    <!-- LEFT: Activities Drawer (starts below header to avoid overlap) -->
+    <aside id="leftDrawer"
+      class="fixed top-[60px] bottom-0 left-0 z-40 border-r border-zinc-200 bg-white shadow-xl transition-[width,opacity] duration-200 ease-out w-[72px]">
+      <!-- header (collapse/expand icon always visible) -->
+      <div class="h-[60px] border-b border-zinc-200 px-3 flex items-center justify-between gap-2">
+        <div class="min-w-0">
+          <div id="leftTitle" class="hidden md:block text-sm font-semibold truncate">Activities</div>
+          <div id="leftSub" class="hidden md:block text-[11px] text-zinc-500 truncate">
+            Meetings • Notes • Transcripts (last 180 days)
+          </div>
+          <div class="md:hidden text-sm font-semibold">A</div>
+        </div>
+
+        <button id="btnLeftToggle"
+          class="shrink-0 rounded-xl border border-zinc-200 bg-white w-9 h-9 grid place-items-center hover:bg-zinc-50"
+          title="Toggle left panel" aria-label="Toggle left panel"></button>
+      </div>
+
+      <!-- expanded content -->
+      <div id="leftContent" class="hidden h-[calc(100vh-60px-60px)] overflow-auto p-4 space-y-4">
+        <!-- Add activity (Meetings, Notes, Start only) -->
+        <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <div class="text-sm font-semibold">Add activity</div>
+              <div class="text-xs text-zinc-500">Capture customer touchpoints to keep the account on track.</div>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button class="btnAdd rounded-xl bg-[#FDE047] px-3 py-2 text-sm font-semibold hover:brightness-95" data-type="meeting" title="Log a meeting or call">+ Meeting</button>
+              <button class="btnAdd rounded-xl bg-[#FDE047] px-3 py-2 text-sm font-semibold hover:brightness-95" data-type="note" title="Capture an account note">+ Note</button>
+              <button id="btnStartTranscribe" class="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm hover:bg-zinc-50"
+                title="Simulate live transcription (creates a meeting with transcript)">Start 🎙️</button>
+            </div>
+          </div>
+          <div class="mt-2 text-[11px] text-zinc-500">
+            Tip: Log every touchpoint—healthy accounts usually have steady cadence and clear next steps.
+          </div>
+        </div>
+
+        <!-- Search -->
+        <div>
+          <label class="text-xs font-semibold text-zinc-500">Search activities</label>
+          <input id="searchInput"
+            class="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#FDE047]"
+            placeholder="Search title, owner, keywords..." />
+        </div>
+
+        <!-- Filters in ONE ROW -->
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="text-xs font-semibold text-zinc-500">Filter by</label>
+            <select id="typeSelect"
+              class="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#FDE047]"
+              title="Filter activity types">
+              <option value="all">All</option>
+              <option value="meeting">Meetings</option>
+              <option value="note">Notes</option>
+              <option value="transcript">Transcripts</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-zinc-500">Window</label>
+            <select id="windowSelect"
+              class="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#FDE047]"
+              title="Focus on overdue or upcoming work">
+              <option value="any">Any time</option>
+              <option value="7">Next 7 days</option>
+              <option value="30">Next 30 days</option>
+              <option value="overdue">Overdue</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-zinc-500">Company</label>
+            <select id="companySelect"
+              class="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#FDE047]"
+              title="Filter activities by customer/company"></select>
+          </div>
+        </div>
+
+        <!-- Activity area: LIST vs DETAILS (details opens OVER activity area, not chat) -->
+        <div id="activityArea">
+          <!-- LIST -->
+          <div id="activityListView">
+            <div class="flex items-center justify-between mb-2">
+              <div class="text-xs font-semibold text-zinc-500">UPCOMING • click to open details</div>
+              <button id="btnRefresh" class="rounded-xl border border-zinc-200 bg-white px-2.5 py-1.5 text-xs hover:bg-zinc-50"
+                title="Refresh list (mock)">Refresh</button>
+            </div>
+            <div id="activityList" class="space-y-2"></div>
+            <div class="mt-2 text-[11px] text-zinc-500">
+              Tip: Keep meetings outcome-based: decision, owner, deadline, next touchpoint.
+            </div>
+          </div>
+
+          <!-- DETAILS -->
+          <div id="activityDetailView" class="hidden">
+            <div class="flex items-center justify-between">
+              <button id="btnActBack" class="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm hover:bg-zinc-50">← Back</button>
+              <div class="text-xs text-zinc-500">Activity details</div>
+            </div>
+
+            <div class="mt-3 rounded-2xl border border-zinc-200 bg-white p-3">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2">
+                    <div id="actBadgeWrap"></div>
+                    <div id="actTitle" class="text-sm font-semibold truncate">—</div>
+                  </div>
+                  <div id="actMeta" class="text-xs text-zinc-500 mt-1">—</div>
+                </div>
+                <div class="text-xs font-semibold px-2 py-1 rounded-lg bg-zinc-50 border border-zinc-200 text-zinc-700" title="Status (mock)">Open</div>
+              </div>
+
+              <!-- Details menu options -->
+              <div class="mt-3 flex flex-wrap gap-2">
+                <button class="actTab rounded-xl bg-[#FDE047] px-3 py-2 text-xs font-semibold hover:brightness-95" data-atab="overview">Overview</button>
+                <button class="actTab rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs hover:bg-zinc-50" data-atab="notes">Notes</button>
+                <button class="actTab rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs hover:bg-zinc-50" data-atab="transcript">Transcript</button>
+              </div>
+
+              <div id="actTabBody" class="mt-3 space-y-2"></div>
+
+              <div class="mt-4 grid grid-cols-2 gap-2">
+                <button id="btnActAskAI" class="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm hover:bg-zinc-50"
+                  title="Ask AI to summarize + recommend next best actions">Ask AI</button>
+                <button id="btnActQuickAction" class="rounded-xl bg-[#FDE047] px-3 py-2 text-sm font-semibold hover:brightness-95"
+                  title="Mock action (e.g., schedule follow-up)">Action</button>
+              </div>
+              <div class="mt-2 text-[11px] text-zinc-500">
+                Helpful tip: Great next steps are specific—owner + due date + expected customer outcome.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- collapsed icons rail (menu options always visible) -->
+      <div id="leftRail" class="h-[calc(100vh-60px-60px)] flex flex-col items-center py-3 gap-3">
+        <button class="railBtnL rounded-xl border border-zinc-200 bg-white w-10 h-10 grid place-items-center hover:bg-zinc-50"
+          data-open="activities" title="Activities (all)" aria-label="Activities"><span class="w-5 h-5" id="icoActivities"></span></button>
+
+        <button class="railBtnL rounded-xl border border-zinc-200 bg-white w-10 h-10 grid place-items-center hover:bg-zinc-50"
+          data-open="meeting" title="Meetings" aria-label="Meetings"><span class="w-5 h-5" id="icoCalendar"></span></button>
+
+        <button class="railBtnL rounded-xl border border-zinc-200 bg-white w-10 h-10 grid place-items-center hover:bg-zinc-50"
+          data-open="note" title="Notes" aria-label="Notes"><span class="w-5 h-5" id="icoNote"></span></button>
+
+        <button class="railBtnL rounded-xl border border-zinc-200 bg-white w-10 h-10 grid place-items-center hover:bg-zinc-50"
+          data-open="transcript" title="Transcripts" aria-label="Transcripts"><span class="w-5 h-5" id="icoMic"></span></button>
+
+        <button class="railBtnL rounded-xl border border-zinc-200 bg-white w-10 h-10 grid place-items-center hover:bg-zinc-50"
+          data-open="start" title="Start transcription" aria-label="Start transcription"><span class="w-5 h-5" id="icoStart"></span></button>
+      </div>
+    </aside>
+
+    <!-- RIGHT: Drawer (starts below header to avoid overlap) -->
+    <aside id="rightDrawer"
+      class="fixed top-[60px] bottom-0 right-0 z-40 border-l border-zinc-200 bg-white shadow-xl transition-[width,opacity] duration-200 ease-out w-[72px]">
+      <div class="h-[60px] border-b border-zinc-200 px-3 flex items-center justify-between gap-2">
+        <div class="min-w-0 text-right ml-auto">
+          <div id="rightTitle" class="hidden md:block text-sm font-semibold truncate">Workspace</div>
+          <div id="rightSub" class="hidden md:block text-[11px] text-zinc-500 truncate">
+            Customers • Recommendations • Dashboard
+          </div>
+          <div class="md:hidden text-sm font-semibold">W</div>
+        </div>
+
+        <button id="btnRightToggle"
+          class="shrink-0 rounded-xl border border-zinc-200 bg-white w-9 h-9 grid place-items-center hover:bg-zinc-50"
+          title="Toggle right panel" aria-label="Toggle right panel"></button>
+      </div>
+
+      <div id="rightContent" class="hidden h-[calc(100vh-60px-60px)] overflow-auto p-4 space-y-4">
+        <!-- NORMAL: Tabs (Customers first, then Recommendations, then Dashboard) -->
+        <div id="rightTabsRow" class="flex flex-wrap gap-2">
+          <button class="rightTab rounded-xl bg-[#FDE047] px-3 py-2 text-sm font-semibold hover:brightness-95" data-right="customers"
+            title="Search and open a customer">Customer list</button>
+          <button class="rightTab rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm hover:bg-zinc-50" data-right="recs"
+            title="Customer success recommendations">Recommendations</button>
+          <button class="rightTab rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm hover:bg-zinc-50" data-right="dashboard"
+            title="Customer success KPIs and widgets">Dashboard</button>
+        </div>
+
+        <!-- SETTINGS MODE PANEL -->
+        <div id="rightSettingsPanel" class="hidden space-y-3">
+          <div class="rounded-2xl border border-zinc-200 bg-white p-3">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="text-sm font-semibold">Connect integration</div>
+                <div class="text-xs text-zinc-500 mt-1">Import CRM data to populate customers, deals, contacts, and activities.</div>
+              </div>
+              <div class="text-[11px] font-semibold px-2 py-1 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-800">Settings</div>
+            </div>
+
+            <button id="btnConnectIntegration"
+              class="mt-3 w-full rounded-2xl bg-[#FDE047] px-4 py-3 text-sm font-semibold hover:brightness-95"
+              title="Choose your CRM (mock)">Connect integration</button>
+
+            <div class="mt-2 text-[11px] text-zinc-500">
+              Tip: Start with your CRM, then add product usage + support tickets for better health scoring.
+            </div>
+          </div>
+
+          <div id="integrationPicker" class="hidden rounded-2xl border border-zinc-200 bg-white p-3">
+            <div class="text-sm font-semibold">Choose a CRM</div>
+            <div class="text-xs text-zinc-500 mt-1">We’ll simulate an import pipeline.</div>
+
+            <div class="mt-3 grid gap-2">
+              <button class="btnPickCRM rounded-2xl border border-zinc-200 bg-white p-3 hover:bg-zinc-50 text-left flex items-center justify-between"
+                data-crm="HubSpot">
+                <div class="min-w-0">
+                  <div class="text-sm font-semibold">HubSpot</div>
+                  <div class="text-xs text-zinc-500">Companies • Deals • Contacts • Activities</div>
+                </div>
+                <span class="text-xs font-semibold px-2 py-1 rounded-lg bg-zinc-50 border border-zinc-200 text-zinc-700">Select</span>
+              </button>
+
+              <button class="btnPickCRM rounded-2xl border border-zinc-200 bg-white p-3 hover:bg-zinc-50 text-left flex items-center justify-between"
+                data-crm="Zoho">
+                <div class="min-w-0">
+                  <div class="text-sm font-semibold">Zoho CRM</div>
+                  <div class="text-xs text-zinc-500">Accounts • Deals • Contacts • Activities</div>
+                </div>
+                <span class="text-xs font-semibold px-2 py-1 rounded-lg bg-zinc-50 border border-zinc-200 text-zinc-700">Select</span>
+              </button>
+            </div>
+          </div>
+
+          <div id="importProgress" class="hidden rounded-2xl border border-zinc-200 bg-white p-3">
+            <div class="flex items-center justify-between gap-2">
+              <div>
+                <div class="text-sm font-semibold">Import in progress</div>
+                <div id="importMeta" class="text-xs text-zinc-500 mt-1">—</div>
+              </div>
+              <div id="importBadge" class="text-[11px] font-semibold px-2 py-1 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-800">Running</div>
+            </div>
+
+            <div class="mt-3 space-y-3" id="importSteps"></div>
+
+            <button id="btnImportDone"
+              class="hidden mt-4 w-full rounded-2xl bg-[#FDE047] px-4 py-3 text-sm font-semibold hover:brightness-95"
+              title="Finish and return to workspace">Done</button>
+
+            <div class="mt-2 text-[11px] text-zinc-500">
+              Pipeline stages: Step 1 Company • Step 2 Opportunities/Deals (grouped by company) • Step 3 Contacts (backfill) • Activities (up to 180 days: meetings, notes)
+            </div>
+          </div>
+        </div>
+
+        <!-- ACTION VIEW (opens OVER right drawer) -->
+        <div id="rightActionView" class="hidden">
+          <div class="flex items-center justify-between">
+            <button id="btnActionBack" class="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm hover:bg-zinc-50">← Back</button>
+            <div class="text-xs text-zinc-500">Action</div>
+          </div>
+
+          <div class="mt-3 rounded-2xl border border-zinc-200 bg-white p-3">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <div id="actionTitle" class="text-sm font-semibold">—</div>
+                <div id="actionMeta" class="text-xs text-zinc-500 mt-1">—</div>
+              </div>
+              <div id="actionBadge" class="text-xs font-semibold px-2 py-1 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-800">In progress</div>
+            </div>
+
+            <div id="actionBody" class="mt-3 space-y-3"></div>
+
+            <div class="mt-4 grid grid-cols-2 gap-2">
+              <button id="btnActionAskAI" class="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm hover:bg-zinc-50">Ask AI</button>
+              <button id="btnActionDone" class="rounded-xl bg-[#FDE047] px-3 py-2 text-sm font-semibold hover:brightness-95">Mark done</button>
+            </div>
+
+            <div class="mt-2 text-[11px] text-zinc-500">
+              Tip: Actions are best when they reduce churn risk or increase expansion readiness.
+            </div>
+          </div>
+        </div>
+
+        <!-- CUSTOMERS (first tab) -->
+        <div id="rightCustomers">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <div class="text-sm font-semibold">Customer List</div>
+              <div class="text-xs text-zinc-500">Search → click a customer to open detail</div>
+            </div>
+            <div class="text-[11px] font-semibold px-2 py-1 rounded-lg bg-zinc-50 border border-zinc-200 text-zinc-700" title="Mock dataset">
+              8 customers
+            </div>
+          </div>
+
+          <!-- Customer search bar -->
+          <div class="mt-3">
+            <label class="text-xs font-semibold text-zinc-500">Search customers</label>
+            <input id="customerSearch"
+              class="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#FDE047]"
+              placeholder="Search name, segment, CSM..." />
+          </div>
+
+          <div id="customerListRight" class="mt-3 space-y-1"></div>
+        </div>
+
+        <!-- RECOMMENDATIONS (second tab) -->
+        <div id="rightRecs" class="hidden space-y-3">
+          <div class="rounded-2xl border border-zinc-200 bg-white p-3">
+            <div class="flex items-center justify-between gap-2">
+              <div>
+                <div class="text-sm font-semibold">Recommendations</div>
+                <div class="text-xs text-zinc-500">Customer success guidance (priority + tied to a company)</div>
+              </div>
+              <div class="w-44">
+                <label class="text-[11px] font-semibold text-zinc-500">Company</label>
+                <select id="recCompanyFilter" class="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-2.5 py-2 text-sm outline-none focus:ring-2 focus:ring-[#FDE047]">
+                  <option value="all">All</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-zinc-200 bg-white p-3">
+            <div class="flex items-center justify-between">
+              <div class="text-sm font-semibold">General</div>
+              <div class="text-[11px] text-zinc-500">Playbook-style best practices</div>
+            </div>
+            <div id="globalGeneralRecs" class="mt-3 space-y-2"></div>
+          </div>
+
+          <div class="rounded-2xl border border-zinc-200 bg-yellow-50 p-3">
+            <div class="flex items-center justify-between">
+              <div class="text-sm font-semibold">Churn risk</div>
+              <div class="text-[11px] text-zinc-600">Reduce churn drivers</div>
+            </div>
+            <div id="globalChurnRecs" class="mt-3 space-y-2"></div>
+          </div>
+
+          <div class="rounded-2xl border border-zinc-200 bg-yellow-50 p-3">
+            <div class="flex items-center justify-between">
+              <div class="text-sm font-semibold">Growth potential</div>
+              <div class="text-[11px] text-zinc-600">Increase expansion readiness</div>
+            </div>
+            <div id="globalGrowthRecs" class="mt-3 space-y-2"></div>
+          </div>
+        </div>
+
+        <!-- DASHBOARD (third tab) -->
+        <div id="rightDashboard" class="hidden">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <div class="text-sm font-semibold">Dashboard</div>
+              <div class="text-xs text-zinc-500">CSM KPIs + widgets</div>
+            </div>
+            <button id="btnDashPrompt" class="rounded-xl bg-[#FDE047] px-3 py-2 text-sm font-semibold hover:brightness-95" title="Create widget from a prompt (mock)">+</button>
+          </div>
+
+          <div id="dashPromptWrap" class="hidden mt-3">
+            <input id="dashPrompt" class="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#FDE047]"
+              placeholder="Type a widget prompt (e.g., 'Show churn risk trend by segment')" />
+            <button id="btnCreateWidget" class="mt-2 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm hover:bg-zinc-50">
+              Create widget (mock)
+            </button>
+          </div>
+
+          <div class="mt-3 grid gap-2">
+            <div class="rounded-2xl border border-zinc-200 bg-white p-3">
+              <div class="text-xs font-semibold text-zinc-500">TOTAL ARR</div>
+              <div class="mt-2 text-2xl font-semibold">€1,240,000</div>
+              <div class="text-xs text-zinc-500 mt-1">Revenue tracked across active contracts (mock)</div>
+            </div>
+
+            <div class="rounded-2xl border border-zinc-200 bg-white p-3">
+              <div class="text-xs font-semibold text-zinc-500">TOTAL MRR</div>
+              <div class="mt-2 text-2xl font-semibold">€103,333</div>
+              <div class="text-xs text-zinc-500 mt-1">Useful for week-to-week CS health (mock)</div>
+            </div>
+
+            <div class="rounded-2xl border border-zinc-200 bg-white p-3">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-xs font-semibold text-zinc-500">HIGH-TOUCH CUSTOMERS</div>
+                  <div class="text-[11px] text-zinc-500 mt-1">Accounts needing proactive cadence</div>
+                </div>
+                <span class="text-[11px] font-semibold px-2 py-1 rounded-lg bg-zinc-50 border border-zinc-200 text-zinc-700">List</span>
+              </div>
+              <div id="highTouchList" class="mt-3 space-y-2"></div>
+            </div>
+
+            <div class="rounded-2xl border border-zinc-200 bg-white p-3">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-xs font-semibold text-zinc-500">REVENUE OVER TIME</div>
+                  <div class="text-[11px] text-zinc-500 mt-1">Bubbles = customer-month revenue • hover tooltip</div>
+                </div>
+                <button id="btnRegenBubbles" class="rounded-xl border border-zinc-200 bg-white px-2.5 py-1.5 text-xs hover:bg-zinc-50">Regenerate</button>
+              </div>
+
+              <div class="mt-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-2 overflow-hidden">
+                <svg id="bubbleSvg" viewBox="0 0 420 170" class="w-full h-[170px]"></svg>
+              </div>
+            </div>
+
+            <div class="rounded-2xl border border-zinc-200 bg-white p-3">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-xs font-semibold text-zinc-500">CHURN RISK INDEX (MOCK)</div>
+                  <div class="text-[11px] text-zinc-500 mt-1">Lower is better • derived from activity + health signals</div>
+                </div>
+                <button id="btnRegenLine" class="rounded-xl border border-zinc-200 bg-white px-2.5 py-1.5 text-xs hover:bg-zinc-50">Regenerate</button>
+              </div>
+              <div class="mt-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-2 overflow-hidden">
+                <svg id="lineSvg" viewBox="0 0 420 160" class="w-full h-[160px]"></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customer detail -->
+        <div id="rightCustomerDetail" class="hidden">
+          <div class="flex items-center justify-between">
+            <button id="btnBackToCustomerList" class="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm hover:bg-zinc-50">← Back</button>
+            <div class="text-xs text-zinc-500">Customer detail</div>
+          </div>
+
+          <div class="mt-3 rounded-2xl border border-zinc-200 bg-white p-3">
+            <div id="custDetailName" class="text-lg font-semibold leading-tight">—</div>
+            <div id="custDetailMeta" class="text-sm text-zinc-600 mt-1">—</div>
+
+            <div class="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-3">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2">
+                    <div class="h-8 w-8 rounded-xl bg-emerald-600 text-white grid place-items-center" title="AI Health Score">
+                      <span class="w-5 h-5" id="icoAI"></span>
+                    </div>
+                    <div class="min-w-0">
+                      <div class="text-xs font-semibold text-emerald-900/80">AI HEALTH SCORE</div>
+                      <div class="text-[11px] text-emerald-900/70 truncate">Primary system score</div>
+                    </div>
+                  </div>
+
+                  <div class="mt-2 flex items-end gap-2">
+                    <div id="custHealthAI" class="text-4xl font-black tracking-tight text-emerald-700">—</div>
+                    <div class="text-xs text-emerald-900/70 pb-1">/ 100</div>
+                    <div class="ml-2 text-[11px] font-semibold px-2 py-1 rounded-lg border border-emerald-200 bg-[#FDE047] text-zinc-900">Top signal</div>
+                  </div>
+                </div>
+
+                <div class="rounded-xl bg-white border border-zinc-200 px-3 py-2">
+                  <div class="text-[11px] text-zinc-500">MRR</div>
+                  <div id="custMRR" class="text-sm font-semibold">—</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-3 rounded-2xl border border-zinc-200 bg-white p-3">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="text-xs font-semibold text-zinc-500">CSM PULSE SCORE</div>
+                  <div class="text-[11px] text-zinc-500 mt-1">Your judgement score (notes + stakeholder confidence)</div>
+                </div>
+                <div class="text-2xl font-black" id="custHealthPulse">—</div>
+              </div>
+              <div class="mt-2">
+                <div class="h-2 rounded-full bg-zinc-100 overflow-hidden border border-zinc-200">
+                  <div id="pulseBar" class="h-full bg-[#FDE047]" style="width:50%"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-3">
+              <div class="text-xs font-semibold text-zinc-500">Company-specific recommendations</div>
+              <div id="custRecs" class="mt-2 space-y-2"></div>
+            </div>
+
+            <div class="mt-4">
+              <div class="text-xs font-semibold text-zinc-500">Contracts</div>
+              <div id="custContracts" class="mt-2 rounded-2xl border border-zinc-200 bg-white overflow-hidden"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- collapsed icons rail -->
+      <div id="rightRail" class="h-[calc(100vh-60px-60px)] flex flex-col items-center py-3 gap-3">
+        <button class="railBtnR rounded-xl border border-zinc-200 bg-white w-10 h-10 grid place-items-center hover:bg-zinc-50"
+          data-open="customers" title="Customer list" aria-label="Customer list"><span class="w-5 h-5" id="icoUsers"></span></button>
+
+        <button class="railBtnR rounded-xl border border-zinc-200 bg-white w-10 h-10 grid place-items-center hover:bg-zinc-50"
+          data-open="recs" title="Recommendations" aria-label="Recommendations"><span class="w-5 h-5" id="icoSparkles"></span></button>
+
+        <button class="railBtnR rounded-xl border border-zinc-200 bg-white w-10 h-10 grid place-items-center hover:bg-zinc-50"
+          data-open="dashboard" title="Dashboard" aria-label="Dashboard"><span class="w-5 h-5" id="icoChart"></span></button>
+      </div>
+    </aside>
+
+    <!-- CENTER (Chat) -->
+    <section id="center"
+      class="min-h-[calc(100vh-60px)] transition-[margin] duration-200 ease-out ml-[72px] mr-[72px] pt-0">
+      <div class="px-4 py-4">
+        <div class="rounded-2xl border border-zinc-200 bg-white shadow-sm h-[calc(100vh-60px-32px)] flex flex-col overflow-hidden">
+          <div id="chatView" class="h-full flex flex-col">
+            <div class="px-4 py-3 border-b border-zinc-200 flex items-center justify-between gap-3">
+              <div class="min-w-0">
+                <div class="font-semibold">AI Chat</div>
+                <div id="chatSub" class="text-xs text-zinc-500 truncate">
+                  Pick a customer and ask for next steps, risks, or summaries.
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <!-- Toggle: hide/show chat starters (recommendations) -->
+                <label class="flex items-center gap-2 text-xs text-zinc-600 select-none">
+                  <input id="toggleStarters" type="checkbox" class="accent-black" checked />
+                  <span class="hidden sm:inline">Show starters</span>
+                  <span class="w-4 h-4 inline-block" title="Starter recommendations" id="icoSparklesMini"></span>
+                </label>
+
+                <button id="btnNewChat" class="rounded-xl bg-[#FDE047] px-3 py-2 text-sm font-semibold hover:brightness-95" title="Start a new chat">
+                  New chat +
+                </button>
+              </div>
+            </div>
+
+            <div id="chatBody" class="flex-1 overflow-auto px-4 py-4 space-y-3 bg-zinc-50"></div>
+
+            <div class="border-t border-zinc-200 bg-white p-3">
+              <div class="flex items-end gap-2">
+                <textarea id="chatInput" rows="2"
+                  class="w-full resize-none rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#FDE047]"
+                  placeholder="Ask: ‘Summarize latest meeting’, ‘What are churn risks?’, ‘Draft a recap email’..."></textarea>
+                <button id="btnSend" class="rounded-2xl bg-[#FDE047] px-4 py-2 text-sm font-semibold hover:brightness-95">Send</button>
+              </div>
+              <div class="mt-2 text-[11px] text-zinc-500">
+                Tip: Ask “What’s the next best action for renewal?” to get actionable CS guidance.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal: Add Activity -->
+  <div id="modalBackdrop" class="hidden fixed inset-0 z-50 bg-black/40"></div>
+  <div id="modal" class="hidden fixed inset-0 z-50 grid place-items-center p-4">
+    <div class="w-full max-w-xl rounded-2xl bg-white border border-zinc-200 shadow-xl overflow-hidden">
+      <div class="px-4 py-3 border-b border-zinc-200 flex items-center justify-between">
+        <div>
+          <div class="font-semibold">New activity</div>
+          <div class="text-xs text-zinc-500">Meetings + notes only</div>
+        </div>
+        <button id="btnCloseModal" class="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm hover:bg-zinc-50">Close</button>
+      </div>
+      <div class="p-4 grid gap-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-semibold text-zinc-500">Type</label>
+            <select id="modalType" class="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#FDE047]">
+              <option value="meeting">Meeting</option>
+              <option value="note">Note</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-zinc-500">Company</label>
+            <select id="modalCompany" class="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#FDE047]"></select>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs font-semibold text-zinc-500">Title</label>
+          <input id="modalTitleInput" class="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#FDE047]"
+                 placeholder="e.g., QBR check-in • Renewal prep call • Stakeholder note" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-semibold text-zinc-500">Owner</label>
+            <input id="modalOwner" class="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#FDE047]"
+                   value="Daniel" />
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-zinc-500">When</label>
+            <input id="modalWhen" type="datetime-local"
+                   class="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#FDE047]" />
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs font-semibold text-zinc-500">Details</label>
+          <textarea id="modalDetails" rows="4"
+            class="mt-1 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#FDE047]"
+            placeholder="Outcome, risks, owners, next steps..."></textarea>
+        </div>
+
+        <button id="btnCreateActivity" class="rounded-2xl bg-[#FDE047] px-4 py-3 text-sm font-semibold hover:brightness-95">
+          Create activity
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recording simulation overlay -->
+  <div id="recordBackdrop" class="hidden fixed inset-0 z-[70] bg-black/50"></div>
+  <div id="recordModal" class="hidden fixed inset-0 z-[70] grid place-items-center p-4">
+    <div class="w-full max-w-lg rounded-2xl bg-white border border-zinc-200 shadow-xl overflow-hidden">
+      <div class="px-4 py-3 border-b border-zinc-200 flex items-center justify-between">
+        <div>
+          <div class="font-semibold">Starting transcription…</div>
+          <div class="text-xs text-zinc-500">Simulating live recording. Close to end.</div>
+        </div>
+        <button id="btnStopRecord" class="rounded-xl bg-[#FDE047] px-3 py-2 text-sm font-semibold hover:brightness-95">Close</button>
+      </div>
+      <div class="p-4 space-y-3">
+        <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-3 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="h-3 w-3 rounded-full bg-red-500 animate-pulse"></div>
+            <div class="text-sm font-semibold">Recording</div>
+          </div>
+          <div class="text-sm font-mono text-zinc-700"><span id="recordTimer">00:00</span></div>
+        </div>
+        <div class="rounded-2xl border border-zinc-200 bg-white p-3">
+          <div class="text-xs font-semibold text-zinc-500">Live transcript preview (mock)</div>
+          <pre id="recordText" class="mt-2 whitespace-pre-wrap text-sm text-zinc-700 bg-zinc-50 border border-zinc-200 rounded-xl p-3 h-40 overflow-auto">[00:00] You: Starting now…
+[00:03] Customer: Yep, go ahead…
+[00:06] You: Today we’ll cover adoption + renewal timeline…</pre>
+        </div>
+        <div class="text-xs text-zinc-500">Closing saves a new “Meeting” with transcript for the selected company.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // -----------------------------
+    // Inline SVG icon set
+    // -----------------------------
+    const svg = (path) => `
+      <svg viewBox="0 0 24 24" fill="none" class="w-full h-full" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        ${path}
+      </svg>
+    `;
+    const ICON = {
+      user: svg(`<path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="8" r="4"/>`),
+      settings: svg(`<path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/><path d="M19.4 15a1.8 1.8 0 0 0 .4 2l.1.1-1.6 2.8-0.2-.1a1.8 1.8 0 0 0-2-.4 1.8 1.8 0 0 0-1.1 1.7V23H9v-.2a1.8 1.8 0 0 0-1.1-1.7 1.8 1.8 0 0 0-2 .4l-.2.1L4.1 19l.1-.1a1.8 1.8 0 0 0 .4-2 1.8 1.8 0 0 0-1.7-1.1H3V9h-.1a1.8 1.8 0 0 0 1.7-1.1 1.8 1.8 0 0 0-.4-2l-.1-.1L5.7 3l.2.1a1.8 1.8 0 0 0 2 .4A1.8 1.8 0 0 0 9 1.8V1h6v.8a1.8 1.8 0 0 0 1.1 1.7 1.8 1.8 0 0 0 2-.4l.2-.1 1.6 2.8-.1.1a1.8 1.8 0 0 0-.4 2A1.8 1.8 0 0 0 21.1 9H21v6h.1a1.8 1.8 0 0 0-1.7 1z"/>`),
+
+      users: svg(`<path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/>`),
+      sparkles: svg(`<path d="M12 2l1.2 3.7L17 7l-3.8 1.3L12 12l-1.2-3.7L7 7l3.8-1.3L12 2z"/><path d="M5 13l.8 2.4L8 16l-2.2.6L5 19l-.8-2.4L2 16l2.2-.6L5 13z"/><path d="M19 13l.8 2.4L22 16l-2.2.6L19 19l-.8-2.4L16 16l2.2-.6L19 13z"/>`),
+      chart: svg(`<path d="M3 3v18h18"/><path d="M7 14l3-3 3 2 5-6"/>`),
+
+      activities: svg(`<path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/>`),
+      calendar: svg(`<path d="M8 2v4"/><path d="M16 2v4"/><path d="M3 8h18"/><rect x="3" y="4" width="18" height="18" rx="2"/>`),
+      note: svg(`<path d="M4 4h16v16H4z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h6"/>`),
+      mic: svg(`<path d="M12 14a3 3 0 0 0 3-3V7a3 3 0 0 0-6 0v4a3 3 0 0 0 3 3z"/><path d="M19 11a7 7 0 0 1-14 0"/><path d="M12 18v4"/>`),
+      play: svg(`<path d="M8 5v14l11-7z"/>`),
+      ai: svg(`<path d="M12 2v3"/><path d="M12 19v3"/><path d="M4.2 4.2l2.1 2.1"/><path d="M17.7 17.7l2.1 2.1"/><path d="M2 12h3"/><path d="M19 12h3"/><path d="M4.2 19.8l2.1-2.1"/><path d="M17.7 6.3l2.1-2.1"/><path d="M9 9h6v6H9z"/>`),
+
+      chevronOutLeft: svg(`<path d="M6 8l4 4-4 4"/><path d="M14 4h6v16h-6z"/>`),
+      chevronInLeft: svg(`<path d="M10 8l-4 4 4 4"/><path d="M14 4h6v16h-6z"/>`),
+      chevronOutRight: svg(`<path d="M18 8l-4 4 4 4"/><path d="M4 4h6v16H4z"/>`),
+      chevronInRight: svg(`<path d="M14 8l4 4-4 4"/><path d="M4 4h6v16H4z"/>`),
+    };
+
+    const mount = (id, icon) => { const el = document.getElementById(id); if (el) el.innerHTML = icon; };
+    mount("icoUser", ICON.user);
+    mount("icoSettings", ICON.settings);
+
+    mount("icoActivities", ICON.activities);
+    mount("icoCalendar", ICON.calendar);
+    mount("icoNote", ICON.note);
+    mount("icoMic", ICON.mic);
+    mount("icoStart", ICON.play);
+
+    mount("icoUsers", ICON.users);
+    mount("icoSparkles", ICON.sparkles);
+    mount("icoChart", ICON.chart);
+    mount("icoSparklesMini", ICON.sparkles);
+    mount("icoAI", ICON.ai);
+
+    // -----------------------------
+    // Data
+    // -----------------------------
+    function clamp100(n){ return Math.max(0, Math.min(100, Math.round(n))); }
+    function seeded(seed){ return Math.abs((seed * 9301 + 49297) % 233280) / 233280; }
+    function mkAIHealth(seed) { return clamp100(50 + seeded(seed) * 45); }
+    function mkPulse(seed) { return clamp100(40 + seeded(seed+99) * 55); }
+
+    const customers = [
+      { id:"AAPL",  name:"Apple",     segment:"Tech-touch", csm:"Daniel",  ai: mkAIHealth(1), pulse: mkPulse(1), mrr: 12000 },
+      { id:"MSFT",  name:"Microsoft", segment:"High-touch", csm:"Felix",   ai: mkAIHealth(2), pulse: mkPulse(2), mrr: 22000 },
+      { id:"AMZN",  name:"Amazon",    segment:"Tech-touch", csm:"Daniel",  ai: mkAIHealth(3), pulse: mkPulse(3), mrr: 18000 },
+      { id:"GOOGL", name:"Alphabet",  segment:"Low-touch",  csm:"Leopold", ai: mkAIHealth(4), pulse: mkPulse(4), mrr: 15000 },
+      { id:"META",  name:"Meta",      segment:"Tech-touch", csm:"Max",     ai: mkAIHealth(5), pulse: mkPulse(5), mrr:  9000 },
+      { id:"NVDA",  name:"NVIDIA",    segment:"High-touch", csm:"Daniel",  ai: mkAIHealth(6), pulse: mkPulse(6), mrr: 26000 },
+      { id:"TSLA",  name:"Tesla",     segment:"Low-touch",  csm:"Felix",   ai: mkAIHealth(7), pulse: mkPulse(7), mrr:  7000 },
+      { id:"JPM",   name:"JPMorgan",  segment:"High-touch", csm:"Max",     ai: mkAIHealth(8), pulse: mkPulse(8), mrr: 14000 },
+    ];
+
+    const contractsByCustomer = {
+      "AAPL": [
+        { name:"Enterprise Platform", products:"3 products", start:"01.01.2024", end:"31.12.2026", amount:"€144,000", status:"Active" },
+        { name:"Reporting Add-on",    products:"1 product",  start:"01.07.2025", end:"30.06.2026", amount:"€24,000",  status:"Active" },
+      ],
+      "MSFT": [{ name:"High-touch Success Plan", products:"2 products", start:"01.03.2025", end:"29.02.2026", amount:"€264,000", status:"Active" }],
+      "AMZN": [{ name:"Usage-based Contract", products:"1 product", start:"01.01.2025", end:"31.12.2025", amount:"€216,000", status:"Active" }],
+      "GOOGL":[{ name:"Low-touch Subscription", products:"1 product", start:"01.01.2025", end:"31.12.2025", amount:"€180,000", status:"Active" }],
+      "META": [{ name:"Starter Contract", products:"1 product", start:"01.02.2025", end:"31.01.2026", amount:"€108,000", status:"Active" }],
+      "NVDA": [{ name:"Enterprise Platform", products:"4 products", start:"01.01.2024", end:"31.12.2027", amount:"€1,248,000", status:"Active" }],
+      "TSLA": [{ name:"Pilot", products:"1 product", start:"01.10.2025", end:"31.12.2025", amount:"€21,000", status:"Active" }],
+      "JPM":  [{ name:"Security + Compliance Pack", products:"2 products", start:"01.04.2025", end:"31.03.2026", amount:"€168,000", status:"Active" }],
+    };
+
+    // -----------------------------
+    // Activities: meetings + notes (+ transcripts on meetings)
+    // -----------------------------
+    const now = new Date();
+    const daysFromNow = (d, h=10) => {
+      const x = new Date(now);
+      x.setDate(x.getDate() + d);
+      x.setHours(h, 0, 0, 0);
+      return x;
+    };
+
+    let activities = [
+      { id:"m1", type:"meeting", company:"AAPL", title:"QBR — Adoption & Renewal Plan", owner:"Daniel", when: daysFromNow(2, 11), transcript:true,
+        meetingData: {
+          summary:"Adoption improving; renewal ownership unclear. Next: confirm procurement + schedule exec sync.",
+          notes:["Usage at 82%","Need exec sponsor","Procurement timeline pending"],
+          transcriptText:"[00:00] Daniel: Thanks...\n[03:12] Customer: Need visibility...\n[08:40] Daniel: Next steps...\n"
+        }
+      },
+      { id:"n1", type:"note", company:"AAPL", title:"Risk: procurement contact changed", owner:"Daniel", when: daysFromNow(-1, 14),
+        noteText:"Champion moved teams; procurement contact changed. Reconfirm owners + timeline."
+      },
+      { id:"m2", type:"meeting", company:"MSFT", title:"Implementation check-in", owner:"Felix", when: daysFromNow(1, 10), transcript:false,
+        meetingData: { summary:"Reviewed milestones + blockers. Integration pending.", notes:["Integration pending","Need KPI definitions"], transcriptText:"" }
+      },
+      { id:"n2", type:"note", company:"MSFT", title:"Account context: exec sponsor wants ROI proof", owner:"Felix", when: daysFromNow(-3, 15),
+        noteText:"Next touchpoint should include ROI framing + timeline owners."
+      },
+      { id:"m3", type:"meeting", company:"AMZN", title:"Renewal prep — pricing & scope", owner:"Daniel", when: daysFromNow(10, 13), transcript:true,
+        meetingData:{
+          summary:"Renewal likely if KPI dashboard ships. Pricing sensitivity → propose tiers + bundle add-ons.",
+          notes:["Asked for SKU breakdown","Seat growth cost concern"],
+          transcriptText:"[00:00] Daniel: Renewal...\n[05:30] Customer: Budget tight...\n[12:10] Daniel: We'll propose tiers...\n"
+        }
+      },
+    ];
+
+    // congestion: more meetings + notes
+    const owners = ["Daniel","Felix","Leopold","Max","Andrei","Marta","Nina"];
+    const meetingTitles = ["Monthly check-in","Stakeholder sync","Executive update","QBR prep","Renewal timeline call","Integration review","Usage drop review"];
+    const noteTitles = ["Note: blocker discovered","Note: stakeholder risk","Note: success plan update","Note: feature request","Note: adoption insight"];
+    let genId = 1000;
+
+    function addCongestion() {
+      const custIds = customers.map(c => c.id);
+      for (let i=0;i<70;i++) {
+        const company = custIds[i % custIds.length];
+        const type = (i % 2 === 0) ? "meeting" : "note";
+        const d = (i % 18) - 4;
+        const h = 8 + (i % 10);
+        const owner = owners[i % owners.length];
+        const hasTranscript = (type === "meeting") ? (i % 8 === 0) : false;
+
+        const title =
+          (type === "meeting" ? meetingTitles[i % meetingTitles.length] : noteTitles[i % noteTitles.length]) +
+          (i % 11 === 0 ? " (urgent)" : "");
+
+        const base = {
+          id: (type[0] + (genId++)),
+          type, company, title, owner,
+          when: daysFromNow(d, h),
+        };
+
+        if (type === "meeting") {
+          base.transcript = hasTranscript;
+          base.meetingData = {
+            summary: hasTranscript ? "Mock summary: risks + next steps." : "Reviewed adoption, blockers, and owners (mock).",
+            notes: ["Next steps agreed (mock)","Owner assigned (mock)"],
+            transcriptText: hasTranscript ? "[00:00] Speaker: mock transcript...\n[00:10] Speaker: more text...\n" : ""
+          };
+        } else {
+          base.noteText = "Mock note to capture account context (risk, stakeholder, outcomes).";
+        }
+
+        activities.push(base);
+      }
+    }
+    addCongestion();
+
+    // -----------------------------
+    // Recommendations (still on right panel; chat starters can be hidden)
+    // -----------------------------
+    function uid(prefix="rec"){ return prefix + "_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16); }
+    const pickCompany = (i) => customers[i % customers.length].id;
+    const PRIORITY = ["High","Medium","Low"];
+    const pickPriority = (i) => PRIORITY[i % PRIORITY.length];
+
+    let globalGeneral = [
+      { id:uid("gen"), company: pickCompany(6), priority:"Medium", title:"Send weekly outcome recap", meta:"Keep stakeholders aligned on progress + owners", primary:{ label:"Email", type:"email" }, askPrompt:"Write a short weekly outcome recap email with owners and dates.", status:"new" },
+      { id:uid("gen"), company: pickCompany(0), priority:"Medium", title:"Run stakeholder map refresh", meta:"Confirm champion, decision maker, and procurement owner", primary:{ label:"Create task", type:"task" }, askPrompt:"Create a stakeholder map template and the questions to ask.", status:"new" },
+    ];
+    let globalChurn = [
+      { id:uid("ch"), company: pickCompany(0), priority:"High", title:"Confirm renewal owner", meta:"Lock owner + timeline early to reduce churn risk", primary:{ label:"Schedule call", type:"schedule" }, askPrompt:"Draft questions to confirm renewal owner, process, and timeline.", status:"new" },
+      { id:uid("ch"), company: pickCompany(2), priority:"High", title:"Run stakeholder refresh", meta:"Champion change increases churn risk → verify key contacts", primary:{ label:"Email", type:"email" }, askPrompt:"Write a stakeholder refresh email (short + clear).", status:"new" },
+    ];
+    let globalGrowth = [
+      { id:uid("gr"), company: pickCompany(5), priority:"High", title:"Pitch add-on bundle to active teams", meta:"Bundle “reporting + automation” to increase ACV", primary:{ label:"Schedule call", type:"schedule" }, askPrompt:"Prepare a call script to pitch an add-on bundle with ROI framing.", status:"new" },
+      { id:uid("gr"), company: pickCompany(1), priority:"Medium", title:"Upsell when usage cap > 85%", meta:"High utilization = expansion readiness", primary:{ label:"Email", type:"email" }, askPrompt:"Write an expansion email based on high usage (85%+).", status:"new" },
+    ];
+
+    function buildCustomerRecs(companyId) {
+      const c = getCustomer(companyId);
+      return [
+        { id:uid("cr"), company: companyId, priority:"High", title:"Draft recap email", meta:"Send timeline + responsibilities to stakeholders", primary:{ label:"Email", type:"email" }, askPrompt:`Draft a recap email for ${c.name} with next steps and owners.`, status:"new" },
+        { id:uid("cr"), company: companyId, priority:"Medium", title:"Schedule QBR", meta:"Align outcomes + close adoption gaps", primary:{ label:"Schedule call", type:"schedule" }, askPrompt:`Generate a QBR agenda for ${c.name} focused on adoption + renewal.`, status:"new" },
+      ];
+    }
+    const customerRecState = {};
+
+    // -----------------------------
+    // State
+    // -----------------------------
+    let selectedCompany = "AAPL";
+
+    // Drawer modes: collapsed | expanded | hidden
+    let leftMode = "collapsed";
+    let rightMode = "collapsed";
+
+    // App mode: normal | settings
+    let appMode = "normal";
+
+    // Left activity detail state
+    let currentActivityId = null;
+    let actTab = "overview";
+
+    // Right panel state
+    let lastRightView = "customers";
+    let actionContext = null;
+
+    // Chat starters toggle
+    let showStarters = true;
+
+    // -----------------------------
+    // DOM
+    // -----------------------------
+    const leftDrawer = document.getElementById("leftDrawer");
+    const rightDrawer = document.getElementById("rightDrawer");
+    const center = document.getElementById("center");
+
+    const leftContent = document.getElementById("leftContent");
+    const leftRail = document.getElementById("leftRail");
+    const rightContent = document.getElementById("rightContent");
+    const rightRail = document.getElementById("rightRail");
+
+    const companySelect = document.getElementById("companySelect");
+    const windowSelect = document.getElementById("windowSelect");
+    const searchInput = document.getElementById("searchInput");
+    const typeSelect = document.getElementById("typeSelect");
+
+    const activityList = document.getElementById("activityList");
+    const activityListView = document.getElementById("activityListView");
+    const activityDetailView = document.getElementById("activityDetailView");
+
+    const actBadgeWrap = document.getElementById("actBadgeWrap");
+    const actTitle = document.getElementById("actTitle");
+    const actMeta = document.getElementById("actMeta");
+    const actTabBody = document.getElementById("actTabBody");
+
+    const rightTabsRow = document.getElementById("rightTabsRow");
+    const rightSettingsPanel = document.getElementById("rightSettingsPanel");
+
+    const rightRecs = document.getElementById("rightRecs");
+    const rightCustomers = document.getElementById("rightCustomers");
+    const rightDashboard = document.getElementById("rightDashboard");
+    const rightCustomerDetail = document.getElementById("rightCustomerDetail");
+    const rightActionView = document.getElementById("rightActionView");
+
+    const customerListRight = document.getElementById("customerListRight");
+    const customerSearch = document.getElementById("customerSearch");
+
+    const globalGeneralRecs = document.getElementById("globalGeneralRecs");
+    const globalChurnRecs = document.getElementById("globalChurnRecs");
+    const globalGrowthRecs = document.getElementById("globalGrowthRecs");
+    const recCompanyFilter = document.getElementById("recCompanyFilter");
+
+    const custDetailName = document.getElementById("custDetailName");
+    const custDetailMeta = document.getElementById("custDetailMeta");
+    const custHealthAI = document.getElementById("custHealthAI");
+    const custHealthPulse = document.getElementById("custHealthPulse");
+    const pulseBar = document.getElementById("pulseBar");
+    const custMRR = document.getElementById("custMRR");
+    const custRecs = document.getElementById("custRecs");
+    const custContracts = document.getElementById("custContracts");
+
+    // Action view
+    const btnActionBack = document.getElementById("btnActionBack");
+    const actionTitle = document.getElementById("actionTitle");
+    const actionMeta = document.getElementById("actionMeta");
+    const actionBody = document.getElementById("actionBody");
+    const btnActionAskAI = document.getElementById("btnActionAskAI");
+    const btnActionDone = document.getElementById("btnActionDone");
+
+    // Modal
+    const modal = document.getElementById("modal");
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const modalType = document.getElementById("modalType");
+    const modalCompany = document.getElementById("modalCompany");
+    const modalTitleInput = document.getElementById("modalTitleInput");
+    const modalOwner = document.getElementById("modalOwner");
+    const modalWhen = document.getElementById("modalWhen");
+    const modalDetails = document.getElementById("modalDetails");
+
+    // Chat
+    const chatBody = document.getElementById("chatBody");
+    const chatInput = document.getElementById("chatInput");
+    const chatSub = document.getElementById("chatSub");
+    const toggleStarters = document.getElementById("toggleStarters");
+
+    // Recording
+    const recordBackdrop = document.getElementById("recordBackdrop");
+    const recordModal = document.getElementById("recordModal");
+    const recordTimer = document.getElementById("recordTimer");
+    const recordText = document.getElementById("recordText");
+    let recordInterval = null;
+    let recordStartAt = null;
+
+    // Dashboard
+    const bubbleSvg = document.getElementById("bubbleSvg");
+    const lineSvg = document.getElementById("lineSvg");
+    const btnRegenBubbles = document.getElementById("btnRegenBubbles");
+    const btnRegenLine = document.getElementById("btnRegenLine");
+    const highTouchList = document.getElementById("highTouchList");
+
+    // Settings import
+    const btnConnectIntegration = document.getElementById("btnConnectIntegration");
+    const integrationPicker = document.getElementById("integrationPicker");
+    const importProgress = document.getElementById("importProgress");
+    const importSteps = document.getElementById("importSteps");
+    const importMeta = document.getElementById("importMeta");
+    const importBadge = document.getElementById("importBadge");
+    const btnImportDone = document.getElementById("btnImportDone");
+
+    // -----------------------------
+    // Helpers
+    // -----------------------------
+    function fmt(dt) {
+      const d = new Date(dt);
+      return d.toLocaleString([], { month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+    }
+    function escapeHtml(s) {
+      return String(s)
+        .replaceAll("&","&amp;").replaceAll("<","&lt;")
+        .replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
+    }
+    function getCustomer(id){ return customers.find(c => c.id === id); }
+
+    function withinWindow(act, win) {
+      const t = new Date(act.when).getTime();
+      const n = Date.now();
+      if (win === "any") return true;
+      if (win === "overdue") return t < n;
+      const days = parseInt(win, 10);
+      return t >= n && t <= (n + days * 24 * 60 * 60 * 1000);
+    }
+
+    function badge(type, hasTranscript=false) {
+      if (type==="meeting") {
+        return `<span class="text-xs font-semibold px-2 py-1 rounded-lg bg-purple-50 border border-purple-200 text-purple-700">Meeting${hasTranscript ? " • Transcript" : ""}</span>`;
+      }
+      return `<span class="text-xs font-semibold px-2 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700">Note</span>`;
+    }
+
+    function priorityBadge(p) {
+      const base = "text-[11px] font-semibold px-2 py-1 rounded-lg border";
+      if (p === "High") return `<span class="${base} bg-red-50 border-red-200 text-red-700">High</span>`;
+      if (p === "Medium") return `<span class="${base} bg-yellow-50 border-yellow-200 text-yellow-800">Medium</span>`;
+      return `<span class="${base} bg-zinc-50 border-zinc-200 text-zinc-700">Low</span>`;
+    }
+
+    // -----------------------------
+    // Drawer behavior (requested rules)
+    // - When LEFT opens => RIGHT hidden
+    // - When LEFT closes (collapse) => RIGHT returns collapsed (menu options visible)
+    // - When RIGHT opens => LEFT hidden
+    // - When RIGHT closes (collapse) => LEFT returns collapsed (menu options visible)
+    // -----------------------------
+    function setLeftToggleIcon() {
+      const btn = document.getElementById("btnLeftToggle");
+      const expanded = leftMode === "expanded";
+      btn.innerHTML = expanded ? ICON.chevronInLeft : ICON.chevronOutLeft;
+      btn.setAttribute("aria-pressed", expanded ? "true" : "false");
+    }
+    function setRightToggleIcon() {
+      const btn = document.getElementById("btnRightToggle");
+      const expanded = rightMode === "expanded";
+      btn.innerHTML = expanded ? ICON.chevronInRight : ICON.chevronOutRight;
+      btn.setAttribute("aria-pressed", expanded ? "true" : "false");
+    }
+
+    function applyDrawerLayout() {
+      const isMobile = window.matchMedia("(max-width: 768px)").matches;
+      const slim = isMobile ? 56 : 72;
+      const widePx = isMobile ? window.innerWidth : Math.floor(window.innerWidth * 0.5);
+
+      const leftW =
+        leftMode === "hidden" ? 0 :
+        leftMode === "collapsed" ? slim :
+        widePx;
+
+      const rightW =
+        rightMode === "hidden" ? 0 :
+        rightMode === "collapsed" ? slim :
+        widePx;
+
+      leftDrawer.style.width = leftW + "px";
+      rightDrawer.style.width = rightW + "px";
+
+      leftContent.classList.toggle("hidden", leftMode !== "expanded");
+      leftRail.classList.toggle("hidden", leftMode !== "collapsed");
+
+      rightContent.classList.toggle("hidden", rightMode !== "expanded");
+      rightRail.classList.toggle("hidden", rightMode !== "collapsed");
+
+      leftDrawer.classList.toggle("pointer-events-none", leftMode === "hidden");
+      leftDrawer.classList.toggle("opacity-0", leftMode === "hidden");
+      rightDrawer.classList.toggle("pointer-events-none", rightMode === "hidden");
+      rightDrawer.classList.toggle("opacity-0", rightMode === "hidden");
+
+      center.style.marginLeft = leftW + "px";
+      center.style.marginRight = rightW + "px";
+
+      setLeftToggleIcon();
+      setRightToggleIcon();
+    }
+
+    function openLeftExpanded() {
+      leftMode = "expanded";
+      rightMode = "hidden";
+      applyDrawerLayout();
+    }
+
+    function openRightExpanded() {
+      rightMode = "expanded";
+      leftMode = "hidden";
+      applyDrawerLayout();
+    }
+
+    function toggleLeft() {
+      if (leftMode === "hidden") { openLeftExpanded(); return; }
+      if (leftMode === "collapsed") {
+        // expand left -> hide right
+        leftMode = "expanded";
+        rightMode = "hidden";
+      } else {
+        // collapse left -> bring back right collapsed (menus visible)
+        leftMode = "collapsed";
+        rightMode = "collapsed";
+      }
+      applyDrawerLayout();
+    }
+
+    function toggleRight() {
+      if (rightMode === "hidden") { openRightExpanded(); return; }
+      if (rightMode === "collapsed") {
+        // expand right -> hide left
+        rightMode = "expanded";
+        leftMode = "hidden";
+      } else {
+        // collapse right -> bring back left collapsed (menus visible)
+        rightMode = "collapsed";
+        leftMode = "collapsed";
+      }
+      applyDrawerLayout();
+    }
+
+    document.getElementById("btnLeftToggle").addEventListener("click", toggleLeft);
+    document.getElementById("btnRightToggle").addEventListener("click", toggleRight);
+
+    // Rails behavior
+    document.querySelectorAll(".railBtnL").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const t = btn.dataset.open;
+        if (t === "start") { openLeftExpanded(); openRecord(); return; }
+        openLeftExpanded();
+        if (t && t !== "activities") typeSelect.value = t;
+        if (t === "activities") typeSelect.value = "all";
+        renderActivities(); showActivityList();
+      });
+    });
+
+    document.querySelectorAll(".railBtnR").forEach(btn => {
+      btn.addEventListener("click", () => {
+        openRightExpanded();
+        setRightTab(btn.dataset.open || "customers");
+      });
+    });
+
+    window.addEventListener("resize", applyDrawerLayout);
+
+    // -----------------------------
+    // Selects init
+    // -----------------------------
+    function fillCompanySelects() {
+      companySelect.innerHTML = customers.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join("");
+      modalCompany.innerHTML = customers.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join("");
+      companySelect.value = selectedCompany;
+      modalCompany.value = selectedCompany;
+
+      recCompanyFilter.innerHTML =
+        `<option value="all">All</option>` +
+        customers.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join("");
+    }
+
+    // -----------------------------
+    // Right views
+    // -----------------------------
+    function hideAllRightViews() {
+      rightActionView.classList.add("hidden");
+      rightCustomers.classList.add("hidden");
+      rightRecs.classList.add("hidden");
+      rightDashboard.classList.add("hidden");
+      rightCustomerDetail.classList.add("hidden");
+    }
+
+    function setRightTab(which) {
+      if (appMode === "settings") return;
+      lastRightView = which;
+      hideAllRightViews();
+      if (which === "customers") rightCustomers.classList.remove("hidden");
+      if (which === "recs") rightRecs.classList.remove("hidden");
+      if (which === "dashboard") rightDashboard.classList.remove("hidden");
+
+      document.querySelectorAll(".rightTab").forEach(b => {
+        const isActive = b.dataset.right === which;
+        b.className = "rightTab rounded-xl px-3 py-2 text-sm " +
+          (isActive ? "bg-[#FDE047] font-semibold hover:brightness-95"
+                    : "border border-zinc-200 bg-white hover:bg-zinc-50");
+      });
+
+      if (which === "customers") renderRightCustomerList();
+      if (which === "recs") renderAllRecs();
+      if (which === "dashboard") renderDashboardLists();
+    }
+
+    document.querySelectorAll(".rightTab").forEach(b => b.addEventListener("click", () => setRightTab(b.dataset.right)));
+
+    function openCustomerDetailView() {
+      lastRightView = "customerDetail";
+      hideAllRightViews();
+      rightCustomerDetail.classList.remove("hidden");
+      document.querySelectorAll(".rightTab").forEach(b => {
+        b.className = "rightTab rounded-xl px-3 py-2 text-sm border border-zinc-200 bg-white hover:bg-zinc-50";
+      });
+    }
+
+    document.getElementById("btnBackToCustomerList").addEventListener("click", () => setRightTab("customers"));
+
+    // Dashboard prompt
+    const dashPromptWrap = document.getElementById("dashPromptWrap");
+    document.getElementById("btnDashPrompt").addEventListener("click", () => dashPromptWrap.classList.toggle("hidden"));
+    document.getElementById("btnCreateWidget").addEventListener("click", () => toast("Widget created (mock)."));
+
+    // -----------------------------
+    // Recommendations rendering
+    // -----------------------------
+    function recCardHTML(rec, scope) {
+      const c = getCustomer(rec.company);
+      const companyName = c ? c.name : rec.company;
+      const dismissable = rec.status === "new";
+
+      return `
+        <div class="rounded-2xl border border-zinc-200 bg-white p-3 relative">
+          ${dismissable ? `
+            <button class="recDismiss absolute top-2 right-2 rounded-lg border border-zinc-200 bg-white w-8 h-8 grid place-items-center hover:bg-zinc-50"
+              title="Dismiss (only before starting)" data-scope="${scope}" data-id="${rec.id}" aria-label="Dismiss">✕</button>
+          ` : `
+            <div class="absolute top-2 right-2 text-[11px] font-semibold px-2 py-1 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-800">Started</div>
+          `}
+          <div class="flex items-center justify-between gap-2 pr-10">
+            <div class="min-w-0">
+              <div class="text-sm font-semibold truncate">${escapeHtml(rec.title)}</div>
+              <div class="text-xs text-zinc-500 mt-1 pr-10">${escapeHtml(rec.meta)}</div>
+            </div>
+            <div class="shrink-0 flex flex-col items-end gap-1">
+              ${priorityBadge(rec.priority || "Medium")}
+              <span class="text-[11px] font-semibold px-2 py-1 rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-700">${escapeHtml(companyName)}</span>
+            </div>
+          </div>
+
+          <div class="mt-3 flex flex-wrap gap-2">
+            <button class="recAction rounded-xl bg-[#FDE047] px-3 py-2 text-xs font-semibold hover:brightness-95"
+              data-scope="${scope}" data-id="${rec.id}" data-act="${escapeHtml(rec.primary.type)}"
+              title="Start the action (mock)">
+              ${escapeHtml(rec.primary.label)}
+            </button>
+            <button class="recAskAI rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs hover:bg-zinc-50"
+              data-scope="${scope}" data-id="${rec.id}" title="Ask AI about this recommendation">
+              Ask AI
+            </button>
+          </div>
+
+          <div class="mt-2 text-[11px] text-zinc-500">Dismiss is only available before you start the action or Ask AI.</div>
+        </div>
+      `;
+    }
+
+    function ensureCustomerRecState(companyId) {
+      if (!customerRecState[companyId]) customerRecState[companyId] = buildCustomerRecs(companyId);
+      return customerRecState[companyId];
+    }
+
+    function getRecRef(scope, id) {
+      const map = { globalGeneral, globalChurn, globalGrowth };
+      if (scope in map) {
+        const arr = map[scope];
+        const idx = arr.findIndex(r => r.id === id);
+        if (idx < 0) return null;
+        return { arr, idx, rec: arr[idx] };
+      }
+      if (scope.startsWith("cust:")) {
+        const companyId = scope.split(":")[1];
+        const arr = ensureCustomerRecState(companyId);
+        const idx = arr.findIndex(r => r.id === id);
+        if (idx < 0) return null;
+        return { arr, idx, rec: arr[idx] };
+      }
+      return null;
+    }
+
+    function markStarted(scope, id) {
+      const m = getRecRef(scope, id);
+      if (!m) return;
+      m.rec.status = "started";
+    }
+    function removeRec(scope, id) {
+      const m = getRecRef(scope, id);
+      if (!m) return;
+      if (m.rec.status !== "new") return;
+      m.arr.splice(m.idx, 1);
+    }
+
+    function wireRecContainer(container) {
+      container.addEventListener("click", (e) => {
+        const dismiss = e.target.closest(".recDismiss");
+        if (dismiss) {
+          removeRec(dismiss.dataset.scope, dismiss.dataset.id);
+          renderAllRecs();
+          toast("Dismissed.");
+          return;
+        }
+        const actBtn = e.target.closest(".recAction");
+        if (actBtn) {
+          openActionView({ scope: actBtn.dataset.scope, id: actBtn.dataset.id, actionType: actBtn.dataset.act });
+          renderAllRecs();
+          return;
+        }
+        const askBtn = e.target.closest(".recAskAI");
+        if (askBtn) {
+          markStarted(askBtn.dataset.scope, askBtn.dataset.id);
+          const ref = getRecRef(askBtn.dataset.scope, askBtn.dataset.id);
+          chatInput.value = ref?.rec?.askPrompt || "Help me with this recommendation.";
+          chatInput.focus();
+          renderAllRecs();
+          toast("Ask AI prefilled.");
+          return;
+        }
+      });
+    }
+    wireRecContainer(globalGeneralRecs);
+    wireRecContainer(globalChurnRecs);
+    wireRecContainer(globalGrowthRecs);
+    wireRecContainer(custRecs);
+
+    function renderAllRecs() {
+      const f = recCompanyFilter.value;
+      const byFilter = (arr) => (f === "all" ? arr : arr.filter(r => r.company === f));
+
+      globalGeneralRecs.innerHTML =
+        byFilter(globalGeneral).map(r => recCardHTML(r, "globalGeneral")).join("") ||
+        `<div class="text-sm text-zinc-600 rounded-xl border border-zinc-200 bg-white p-3">No general recommendations for this company.</div>`;
+
+      globalChurnRecs.innerHTML =
+        byFilter(globalChurn).map(r => recCardHTML(r, "globalChurn")).join("") ||
+        `<div class="text-sm text-zinc-600 rounded-xl border border-zinc-200 bg-white p-3">No churn recommendations for this company.</div>`;
+
+      globalGrowthRecs.innerHTML =
+        byFilter(globalGrowth).map(r => recCardHTML(r, "globalGrowth")).join("") ||
+        `<div class="text-sm text-zinc-600 rounded-xl border border-zinc-200 bg-white p-3">No growth recommendations for this company.</div>`;
+    }
+    recCompanyFilter.addEventListener("change", renderAllRecs);
+
+    // -----------------------------
+    // Action view (right)
+    // -----------------------------
+    function openActionView({ scope, id, actionType }) {
+      openRightExpanded();
+      if (appMode === "settings") return;
+
+      const ref = getRecRef(scope, id);
+      if (!ref) return;
+
+      markStarted(scope, id);
+
+      const comp = getCustomer(ref.rec.company);
+      actionContext = {
+        scope, id,
+        title: ref.rec.title,
+        meta: ref.rec.meta,
+        companyId: ref.rec.company,
+        companyName: comp ? comp.name : ref.rec.company,
+        primaryAction: actionType || ref.rec.primary.type,
+        askPrompt: ref.rec.askPrompt
+      };
+
+      renderActionView();
+      hideAllRightViews();
+      rightActionView.classList.remove("hidden");
+    }
+
+    function renderActionView() {
+      if (!actionContext) return;
+      actionTitle.textContent = actionContext.title;
+      actionMeta.textContent = `${actionContext.companyName} • ${actionContext.primaryAction.toUpperCase()} • (mock action form)`;
+
+      const type = actionContext.primaryAction;
+      const base = `
+        <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-2">
+          <div class="text-xs font-semibold text-zinc-500">Context</div>
+          <div class="mt-1 text-sm text-zinc-700">${escapeHtml(actionContext.meta)}</div>
+        </div>
+      `;
+
+      let form = `
+        <div class="rounded-xl border border-zinc-200 bg-white p-2">
+          <div class="text-xs font-semibold text-zinc-500">Action (mock)</div>
+          <div class="mt-2 text-sm text-zinc-700">
+            This is a placeholder action UI for: <span class="font-semibold">${escapeHtml(type)}</span>
+          </div>
+          <div class="mt-2 text-xs text-zinc-500">Use Ask AI to generate copy, agenda, or next steps.</div>
+        </div>
+      `;
+
+      actionBody.innerHTML = base + form;
+    }
+
+    btnActionBack.addEventListener("click", () => {
+      actionContext = null;
+      if (lastRightView === "customerDetail") openCustomerDetailView();
+      else setRightTab(lastRightView || "customers");
+    });
+
+    btnActionAskAI.addEventListener("click", () => {
+      if (!actionContext) return;
+      chatInput.value = actionContext.askPrompt || ("Help me with: " + actionContext.title);
+      chatInput.focus();
+      toast("Ask AI prefilled in chat.");
+    });
+
+    btnActionDone.addEventListener("click", () => {
+      toast("Marked done (mock).");
+      if (lastRightView === "customerDetail") openCustomerDetailView();
+      else setRightTab(lastRightView || "customers");
+    });
+
+    // -----------------------------
+    // Customer detail
+    // -----------------------------
+    function renderContracts(companyId) {
+      const rows = (contractsByCustomer[companyId] || []);
+      if (!rows.length) {
+        custContracts.innerHTML = `<div class="p-3 text-sm text-zinc-600 bg-zinc-50">No contracts found (mock).</div>`;
+        return;
+      }
+      custContracts.innerHTML = `
+        <div class="overflow-auto">
+          <table class="min-w-full text-sm">
+            <thead class="bg-zinc-50 border-b border-zinc-200">
+              <tr class="text-left">
+                <th class="px-3 py-2 font-semibold text-zinc-600">Contract</th>
+                <th class="px-3 py-2 font-semibold text-zinc-600">Products</th>
+                <th class="px-3 py-2 font-semibold text-zinc-600">Start</th>
+                <th class="px-3 py-2 font-semibold text-zinc-600">End</th>
+                <th class="px-3 py-2 font-semibold text-zinc-600">Amount</th>
+                <th class="px-3 py-2 font-semibold text-zinc-600">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(r => `
+                <tr class="border-b border-zinc-200">
+                  <td class="px-3 py-2 font-semibold">${escapeHtml(r.name)}</td>
+                  <td class="px-3 py-2 text-zinc-700">${escapeHtml(r.products)}</td>
+                  <td class="px-3 py-2 text-zinc-700">${escapeHtml(r.start)}</td>
+                  <td class="px-3 py-2 text-zinc-700">${escapeHtml(r.end)}</td>
+                  <td class="px-3 py-2 text-zinc-700">${escapeHtml(r.amount)}</td>
+                  <td class="px-3 py-2">
+                    <span class="text-xs font-semibold px-2 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700">${escapeHtml(r.status)}</span>
+                  </td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderCustomerDetail() {
+      const c = getCustomer(selectedCompany);
+      if (!c) return;
+
+      custDetailName.textContent = c.name;
+      custDetailMeta.textContent = `${c.segment} • CSM: ${c.csm}`;
+
+      custHealthAI.textContent = `${c.ai}`;
+      custHealthPulse.textContent = `${c.pulse}`;
+      pulseBar.style.width = `${c.pulse}%`;
+
+      custMRR.textContent = `€${c.mrr.toLocaleString()}`;
+
+      const st = ensureCustomerRecState(selectedCompany);
+      custRecs.innerHTML = st.map(r => recCardHTML(r, `cust:${selectedCompany}`)).join("");
+
+      renderContracts(selectedCompany);
+    }
+
+    // -----------------------------
+    // Right: customer list + search
+    // -----------------------------
+    function renderRightCustomerList() {
+      const q = (customerSearch.value || "").trim().toLowerCase();
+      const list = customers.filter(c => {
+        if (!q) return true;
+        const hay = `${c.name} ${c.segment} ${c.csm}`.toLowerCase();
+        return hay.includes(q);
+      });
+
+      customerListRight.innerHTML = "";
+      list.forEach(c => {
+        const isSelected = c.id === selectedCompany;
+        const btn = document.createElement("button");
+        btn.className = "w-full text-left rounded-xl border border-zinc-200 bg-white p-2 hover:bg-zinc-50 flex items-center justify-between";
+        btn.innerHTML = `
+          <div class="min-w-0">
+            <div class="text-sm font-semibold truncate">${escapeHtml(c.name)}</div>
+            <div class="text-xs text-zinc-500">${escapeHtml(c.segment)} • CSM: ${escapeHtml(c.csm)}</div>
+          </div>
+          <div class="flex items-center gap-2">
+            ${isSelected ? `<span class="text-[10px] font-semibold px-2 py-1 rounded-lg bg-[#FDE047] border border-yellow-200 text-zinc-900">Selected</span>` : ""}
+            <div class="text-xs font-black text-emerald-700" title="AI Health Score">${c.ai}</div>
+          </div>
+        `;
+        btn.addEventListener("click", () => {
+          selectedCompany = c.id;
+          companySelect.value = c.id;
+          modalCompany.value = c.id;
+          renderCustomerDetail();
+          renderActivities();
+          openCustomerDetailView();
+          toast(`Opened customer detail: ${c.name}`);
+        });
+        customerListRight.appendChild(btn);
+      });
+
+      if (!list.length) {
+        customerListRight.innerHTML = `<div class="rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-600">No customers match that search.</div>`;
+      }
+    }
+    customerSearch.addEventListener("input", renderRightCustomerList);
+
+    // -----------------------------
+    // Left: activities list + details
+    // -----------------------------
+    function showActivityList() {
+      activityDetailView.classList.add("hidden");
+      activityListView.classList.remove("hidden");
+      currentActivityId = null;
+    }
+    function showActivityDetail(id) {
+      currentActivityId = id;
+      activityListView.classList.add("hidden");
+      activityDetailView.classList.remove("hidden");
+      setActTab("overview");
+      renderActivityDetail();
+    }
+
+    function renderActivities() {
+      const q = searchInput.value.trim().toLowerCase();
+      const win = windowSelect.value;
+      const type = typeSelect.value;
+      const companyId = companySelect.value;
+
+      let list = [...activities].filter(a => a.company === companyId);
+
+      if (type !== "all") {
+        if (type === "transcript") list = list.filter(a => a.type === "meeting" && a.transcript);
+        else list = list.filter(a => a.type === type);
+      }
+
+      list = list.filter(a => withinWindow(a, win));
+
+      if (q) list = list.filter(a =>
+        (a.title||"").toLowerCase().includes(q) ||
+        (a.owner||"").toLowerCase().includes(q) ||
+        (a.noteText||"").toLowerCase().includes(q) ||
+        (a.meetingData?.summary||"").toLowerCase().includes(q)
+      );
+
+      list.sort((a,b) => new Date(a.when) - new Date(b.when));
+
+      activityList.innerHTML = "";
+      if (!list.length) {
+        activityList.innerHTML = `<div class="rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-600">No activities match filters.</div>`;
+        return;
+      }
+
+      list.slice(0, 60).forEach(a => {
+        const el = document.createElement("button");
+        el.className = "w-full text-left rounded-2xl border border-zinc-200 bg-white p-3 hover:bg-zinc-50";
+        el.innerHTML = `
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                ${badge(a.type, !!a.transcript)}
+                <div class="text-sm font-semibold truncate">${escapeHtml(a.title)}</div>
+              </div>
+              <div class="mt-1 text-xs text-zinc-500">
+                ${escapeHtml(getCustomer(a.company)?.name || a.company)} • ${escapeHtml(a.owner)} • ${escapeHtml(fmt(a.when))}
+              </div>
+            </div>
+            <div class="shrink-0 text-xs text-zinc-500">→</div>
+          </div>
+        `;
+        el.addEventListener("click", () => showActivityDetail(a.id));
+        activityList.appendChild(el);
+      });
+    }
+
+    function setActTab(tab) {
+      actTab = tab;
+      document.querySelectorAll(".actTab").forEach(b => {
+        const on = b.dataset.atab === actTab;
+        b.className = "actTab rounded-xl px-3 py-2 text-xs " +
+          (on ? "bg-[#FDE047] font-semibold hover:brightness-95" : "border border-zinc-200 bg-white hover:bg-zinc-50");
+      });
+      renderActivityDetail();
+    }
+    document.querySelectorAll(".actTab").forEach(b => b.addEventListener("click", () => setActTab(b.dataset.atab)));
+
+    function renderActivityDetail() {
+      const a = activities.find(x => x.id === currentActivityId);
+      if (!a) return;
+
+      const c = getCustomer(a.company);
+      actBadgeWrap.innerHTML = badge(a.type, !!a.transcript);
+      actTitle.textContent = a.title;
+      actMeta.textContent = `${c ? c.name : a.company} • ${a.owner} • ${fmt(a.when)}`;
+
+      const isMeeting = a.type === "meeting";
+      const isNote = a.type === "note";
+
+      let body = "";
+
+      if (actTab === "overview") {
+        if (isMeeting) {
+          body = `
+            <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-2">
+              <div class="text-xs font-semibold text-zinc-500">Meeting overview</div>
+              <div class="mt-1 text-sm text-zinc-700">${escapeHtml(a.meetingData?.summary || "(mock) Meeting captured.")}</div>
+              <div class="mt-2 text-xs text-zinc-500">${a.transcript ? "Transcript available." : "No transcript captured yet."}</div>
+            </div>
+          `;
+        } else if (isNote) {
+          body = `
+            <div class="rounded-xl border border-zinc-200 bg-white p-2">
+              <div class="text-xs font-semibold text-zinc-500">Note overview</div>
+              <div class="mt-2 text-sm text-zinc-700">${escapeHtml(a.noteText || "(mock) No note text.")}</div>
+            </div>
+          `;
+        }
+      } else if (actTab === "notes") {
+        if (isMeeting) {
+          const notes = a.meetingData?.notes || [];
+          body = `
+            <div class="rounded-xl border border-zinc-200 bg-white p-2">
+              <div class="text-xs font-semibold text-zinc-500">Meeting notes</div>
+              <div class="mt-2 grid gap-2">
+                ${(notes.length ? notes : ["(mock) No notes yet."]).map(n => `
+                  <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-2 text-sm text-zinc-700">${escapeHtml(n)}</div>
+                `).join("")}
+              </div>
+            </div>
+          `;
+        } else {
+          body = `
+            <div class="rounded-xl border border-zinc-200 bg-white p-2">
+              <div class="text-xs font-semibold text-zinc-500">Notes</div>
+              <div class="mt-2 text-sm text-zinc-700">${escapeHtml(a.noteText || "(mock) No notes.")}</div>
+              <div class="mt-2 text-xs text-zinc-500">Tip: Keep notes outcome-based: risk, impact, next step.</div>
+            </div>
+          `;
+        }
+      } else {
+        if (isMeeting && a.transcript) {
+          body = `
+            <div class="rounded-xl border border-zinc-200 bg-white p-2">
+              <div class="text-xs font-semibold text-zinc-500">Transcript</div>
+              <pre class="mt-2 whitespace-pre-wrap text-sm text-zinc-700 bg-zinc-50 border border-zinc-200 rounded-xl p-3 max-h-56 overflow-auto">${escapeHtml(a.meetingData?.transcriptText || "(mock) Transcript missing.")}</pre>
+              <div class="mt-2 text-[11px] text-zinc-500">Tip: Ask AI to extract risks + action items from transcripts.</div>
+            </div>
+          `;
+        } else {
+          body = `
+            <div class="rounded-xl border border-zinc-200 bg-white p-2">
+              <div class="text-xs font-semibold text-zinc-500">Transcript</div>
+              <div class="mt-2 text-sm text-zinc-700">${isMeeting ? "No transcript captured." : "Transcripts apply to meetings/calls."}</div>
+            </div>
+          `;
+        }
+      }
+
+      actTabBody.innerHTML = body;
+    }
+
+    document.getElementById("btnActBack").addEventListener("click", showActivityList);
+
+    document.getElementById("btnActAskAI").addEventListener("click", () => {
+      const a = activities.find(x => x.id === currentActivityId);
+      const c = a ? getCustomer(a.company) : null;
+      chatInput.value = a
+        ? `Summarize "${a.title}" for ${c ? c.name : a.company} and suggest next best actions (owners + dates).`
+        : "Summarize this activity and suggest next best actions.";
+      chatInput.focus();
+      toast("Ask AI prefilled.");
+    });
+
+    document.getElementById("btnActQuickAction").addEventListener("click", () => {
+      const a = activities.find(x => x.id === currentActivityId);
+      if (!a) return;
+      toast(`Action (mock) for: ${a.title}`);
+    });
+
+    // -----------------------------
+    // Filters wiring
+    // -----------------------------
+    function onCompanyChange(nextId) {
+      selectedCompany = nextId;
+      companySelect.value = nextId;
+      modalCompany.value = nextId;
+
+      renderCustomerDetail();
+      renderActivities();
+      renderRightCustomerList();
+      showActivityList();
+    }
+
+    companySelect.addEventListener("change", (e) => onCompanyChange(e.target.value));
+    [searchInput, windowSelect, typeSelect].forEach(el => el.addEventListener("input", () => { renderActivities(); showActivityList(); }));
+    document.getElementById("btnRefresh").addEventListener("click", () => { renderActivities(); toast("Refreshed."); });
+
+    // -----------------------------
+    // Modal: add activity (meeting/note only)
+    // -----------------------------
+    function openModal(type="meeting") {
+      modalType.value = type;
+      modalTitleInput.value = "";
+      modalDetails.value = "";
+      modalCompany.value = selectedCompany;
+
+      const dt = new Date();
+      dt.setHours(dt.getHours() + 2);
+      modalWhen.value = dt.toISOString().slice(0,16);
+
+      modalBackdrop.classList.remove("hidden");
+      modal.classList.remove("hidden");
+    }
+    function closeModal() {
+      modalBackdrop.classList.add("hidden");
+      modal.classList.add("hidden");
+    }
+    document.querySelectorAll(".btnAdd").forEach(b => b.addEventListener("click", () => openModal(b.dataset.type)));
+    document.getElementById("btnCloseModal").addEventListener("click", closeModal);
+    modalBackdrop.addEventListener("click", closeModal);
+
+    document.getElementById("btnCreateActivity").addEventListener("click", () => {
+      const type = modalType.value; // meeting/note
+      const company = modalCompany.value;
+      const title = (modalTitleInput.value || "").trim() || ("New " + type);
+      const owner = modalOwner.value || "Daniel";
+      const when = modalWhen.value ? new Date(modalWhen.value) : new Date();
+      const details = (modalDetails.value || "").trim();
+
+      const newId = type[0] + Date.now().toString(16);
+      const base = { id:newId, type, company, title, owner, when };
+
+      if (type === "meeting") {
+        base.transcript = false;
+        base.meetingData = { summary: details || "(mock) Meeting created.", notes: [], transcriptText:"" };
+      } else {
+        base.noteText = details || "(mock) Note created.";
+      }
+
+      activities.unshift(base);
+
+      closeModal();
+      onCompanyChange(company);
+      renderActivities();
+      toast("Activity created.");
+    });
+
+    // -----------------------------
+    // Recording simulation (Start)
+    // -----------------------------
+    function openRecord() {
+      recordStartAt = Date.now();
+      recordTimer.textContent = "00:00";
+      recordText.textContent = `[00:00] You: Starting now…
+[00:03] Customer: Yep, go ahead…
+[00:06] You: Today we’ll cover adoption + renewal timeline…`;
+
+      recordBackdrop.classList.remove("hidden");
+      recordModal.classList.remove("hidden");
+
+      clearInterval(recordInterval);
+      recordInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - recordStartAt)/1000);
+        const mm = String(Math.floor(elapsed/60)).padStart(2,"0");
+        const ss = String(elapsed%60).padStart(2,"0");
+        recordTimer.textContent = `${mm}:${ss}`;
+
+        if (elapsed === 8) recordText.textContent += `\n[00:08] Customer: We need clearer ROI proof…`;
+        if (elapsed === 14) recordText.textContent += `\n[00:14] You: Agreed—I'll send a recap + next steps.`;
+        if (elapsed === 22) recordText.textContent += `\n[00:22] Customer: Can we schedule a QBR next week?`;
+        recordText.scrollTop = recordText.scrollHeight;
+      }, 500);
+
+      toast("Starting transcription…");
+    }
+
+    function closeRecord(save=true) {
+      recordBackdrop.classList.add("hidden");
+      recordModal.classList.add("hidden");
+      clearInterval(recordInterval);
+
+      if (save) {
+        const c = getCustomer(selectedCompany);
+        const newId = "m" + Date.now().toString(16);
+        const when = new Date();
+        const transcriptText = recordText.textContent;
+
+        activities.unshift({
+          id:newId,
+          type:"meeting",
+          company:selectedCompany,
+          title:`Recorded call — ${c ? c.name : selectedCompany}`,
+          owner:"Daniel",
+          when,
+          transcript:true,
+          meetingData:{
+            summary:"(mock) Recorded call saved. Key points captured from transcript preview.",
+            notes:["Customer asked for ROI proof","QBR requested for next week","Renewal owner needs confirmation"],
+            transcriptText
+          }
+        });
+
+        renderActivities();
+        toast("Transcription ended → saved meeting with transcript (mock).");
+      } else {
+        toast("Transcription ended (mock).");
+      }
+    }
+
+    document.getElementById("btnStartTranscribe").addEventListener("click", openRecord);
+    document.getElementById("btnStopRecord").addEventListener("click", () => closeRecord(true));
+    recordBackdrop.addEventListener("click", () => closeRecord(true));
+
+    // -----------------------------
+    // Chat (New Chat starters can be hidden)
+    // -----------------------------
+    function pushChat(role, text) {
+      const wrap = document.createElement("div");
+      wrap.className = role === "user" ? "flex justify-end" : "flex justify-start";
+      const bubble = document.createElement("div");
+      bubble.className =
+        (role === "user"
+          ? "max-w-[85%] rounded-2xl bg-[#FDE047] px-3 py-2 text-sm font-medium"
+          : "max-w-[85%] rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800");
+      bubble.textContent = text;
+      wrap.appendChild(bubble);
+      chatBody.appendChild(wrap);
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    function assistantDefaultReply(userMsg, companyId) {
+      const c = getCustomer(companyId);
+      const msg = (userMsg || "").toLowerCase();
+
+      let reply = `Got it. For ${c.name}, next steps: clarify outcome, confirm owners, set dates, and schedule the next touchpoint.`;
+
+      if (msg.includes("churn") || msg.includes("risk")) {
+        reply = `Churn risk check for ${c.name} (mock):\n- Confirm renewal owner + timeline\n- Validate adoption KPI + current usage\n- Schedule exec sponsor sync\n\nNext best action: schedule a 20-min renewal process call and send a recap with owners + dates.`;
+      } else if (msg.includes("renewal")) {
+        reply = `Renewal prep for ${c.name} (mock):\n1) Confirm renewal process + stakeholders\n2) Summarize delivered outcomes\n3) Align next-quarter success plan\n\nNext best action: draft a renewal timeline email and request a decision date.`;
+      } else if (msg.includes("transcript")) {
+        const last = activities
+          .filter(a => a.company === companyId && a.type === "meeting" && a.transcript)
+          .sort((a,b) => new Date(b.when) - new Date(a.when))[0];
+        reply = last
+          ? `Latest transcript: "${last.title}". Summary: ${(last.meetingData?.summary || "(mock) pending.")}\n\nSuggested action: send recap + schedule QBR.`
+          : `No transcripts found yet for ${c.name}. Use Start 🎙️ in Activities to capture one (mock).`;
+      } else if (msg.includes("upcoming")) {
+        const list = activities
+          .filter(a => a.company === companyId)
+          .sort((a,b) => new Date(a.when) - new Date(b.when))
+          .slice(0, 5)
+          .map(a => `${a.type.toUpperCase()}: ${a.title} (${fmt(a.when)})`)
+          .join(" • ");
+        reply = `Next activities for ${c.name}: ${list || "none"}.`;
+      }
+
+      return reply;
+    }
+
+    function getStarterRecs() {
+      const c = getCustomer(selectedCompany);
+      return [
+        { title:`Top churn risks for ${c.name}`, meta:"Identify churn drivers + immediate mitigation", prompt:"What are the top churn risks and the next best actions (with owners + dates)?" },
+        { title:"Summarize latest meeting transcript", meta:"Extract decisions, risks, and action items", prompt:"Summarize the latest transcript and list action items with owners." },
+        { title:"Draft a recap email", meta:"Send next steps + owners to stakeholders", prompt:"Draft a short recap email with owners, dates, and expected outcomes." },
+        { title:"Renewal plan checklist", meta:"Build a clear timeline + stakeholders + proof of value", prompt:"Create a renewal readiness checklist and the next 3 steps." },
+        { title:"Expansion readiness signal", meta:"Spot growth potential and propose an upsell angle", prompt:"Is this account ready for expansion? If yes, propose a next-best action and email draft." },
+      ];
+    }
+
+    function renderNewChatEmpty() {
+      chatBody.dataset.mode = "empty";
+      const c = getCustomer(selectedCompany);
+      chatBody.innerHTML = `
+        <div class="mx-auto max-w-2xl rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+          <div class="text-lg font-semibold">New chat</div>
+          <div class="text-sm text-zinc-600 mt-1">
+            Starter recommendations are hidden. Type a question to begin for <span class="font-semibold">${escapeHtml(c.name)}</span>.
+          </div>
+          <div class="mt-3 text-[11px] text-zinc-500">
+            Tip: Try “What are the top 3 risks and next actions for this account?”
+          </div>
+        </div>
+      `;
+    }
+
+    function renderNewChatHome() {
+      if (!showStarters) return renderNewChatEmpty();
+      chatBody.dataset.mode = "home";
+      const c = getCustomer(selectedCompany);
+      chatBody.innerHTML = `
+        <div class="mx-auto max-w-2xl rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class="font-semibold text-lg">👋 New chat</div>
+              <div class="text-sm text-zinc-600 mt-1">
+                Pick a starter recommendation to begin (or just type your question) for <span class="font-semibold">${escapeHtml(c.name)}</span>.
+              </div>
+            </div>
+            <div class="text-[11px] font-semibold px-2 py-1 rounded-lg bg-zinc-50 border border-zinc-200 text-zinc-700">
+              AI online
+            </div>
+          </div>
+
+          <div class="mt-4 grid gap-2">
+            ${getStarterRecs().map((r) => `
+              <button class="starterRec w-full text-left rounded-2xl border border-zinc-200 bg-white p-3 hover:bg-zinc-50"
+                data-prompt="${escapeHtml(r.prompt)}" title="Click to use this starter">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="min-w-0">
+                    <div class="text-sm font-semibold truncate">${escapeHtml(r.title)}</div>
+                    <div class="text-xs text-zinc-500 mt-1">${escapeHtml(r.meta)}</div>
+                  </div>
+                  <span class="text-[11px] font-semibold px-2 py-1 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-800">Start</span>
+                </div>
+              </button>
+            `).join("")}
+          </div>
+
+          <div class="mt-3 text-[11px] text-zinc-500">
+            Tip: If you don’t know what to ask, try “What are the top 3 risks and next actions for this account?”
+          </div>
+        </div>
+      `;
+
+      chatBody.querySelectorAll(".starterRec").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const prompt = btn.dataset.prompt || "";
+          chatInput.value = prompt;
+          chatInput.focus();
+          toast("Starter loaded. Press Send.");
+        });
+      });
+    }
+
+    toggleStarters.addEventListener("change", () => {
+      showStarters = !!toggleStarters.checked;
+      if (chatBody.dataset.mode === "home" || chatBody.dataset.mode === "empty") {
+        renderNewChatHome();
+      }
+      toast(showStarters ? "Starters shown." : "Starters hidden.");
+    });
+
+    document.getElementById("btnSend").addEventListener("click", () => {
+      const msg = (chatInput.value || "").trim();
+      if (!msg) return;
+
+      chatBody.dataset.mode = "thread";
+      pushChat("user", msg);
+      chatInput.value = "";
+
+      const reply = assistantDefaultReply(msg, selectedCompany);
+      setTimeout(() => pushChat("assistant", reply), 220);
+    });
+
+    document.getElementById("btnNewChat").addEventListener("click", () => {
+      renderNewChatHome();
+      toast("New chat created.");
+    });
+
+    // -----------------------------
+    // Dashboard widgets
+    // -----------------------------
+    function renderDashboardLists() {
+      const list = customers.filter(c => c.segment === "High-touch").slice(0, 6);
+      highTouchList.innerHTML = list.map(c => `
+        <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-2 flex items-center justify-between">
+          <div class="min-w-0">
+            <div class="text-sm font-semibold truncate">${escapeHtml(c.name)}</div>
+            <div class="text-xs text-zinc-500">MRR: €${c.mrr.toLocaleString()} • CSM: ${escapeHtml(c.csm)}</div>
+          </div>
+          <div class="text-xs font-black text-emerald-700" title="AI Health">${c.ai}</div>
+        </div>
+      `).join("") || `<div class="text-sm text-zinc-600 rounded-xl border border-zinc-200 bg-zinc-50 p-3">No high-touch customers (mock).</div>`;
+    }
+
+    function rand(min, max){ return Math.random() * (max - min) + min; }
+    function generateBubbleData() {
+      const months = [];
+      const d = new Date();
+      d.setDate(1);
+      for (let i=5;i>=0;i--) {
+        const x = new Date(d);
+        x.setMonth(d.getMonth() - i);
+        months.push(x.toLocaleString([], { month:"short" }));
+      }
+
+      const pool = [...customers].sort(() => Math.random()-0.5).slice(0, 8);
+      const points = [];
+      pool.forEach((c) => {
+        let base = c.mrr * 1.0;
+        for (let i=0;i<months.length;i++) {
+          const wobble = rand(-0.18, 0.22);
+          const value = Math.max(1000, base * (1 + wobble));
+          points.push({ customer: c.name, month: months[i], revenue: value });
+          base = value;
+        }
+      });
+
+      return { months, points };
+    }
+
+    function renderBubbleChart() {
+      const { months, points } = generateBubbleData();
+      const W = 420, H = 170;
+      const padL = 32, padR = 10, padT = 10, padB = 28;
+      const innerW = W - padL - padR;
+      const innerH = H - padT - padB;
+
+      const revMin = Math.min(...points.map(p => p.revenue));
+      const revMax = Math.max(...points.map(p => p.revenue));
+
+      const xForMonth = (m) => {
+        const idx = months.indexOf(m);
+        const t = (months.length <= 1) ? 0 : idx / (months.length - 1);
+        return padL + t * innerW;
+      };
+      const yForRevenue = (r) => {
+        const t = (revMax === revMin) ? 0.5 : (r - revMin) / (revMax - revMin);
+        return padT + (1 - t) * innerH;
+      };
+      const radiusForRevenue = (r) => {
+        const t = (revMax === revMin) ? 0.5 : (r - revMin) / (revMax - revMin);
+        return 3 + t * 10;
+      };
+
+      let s = "";
+      for (let i=0;i<=4;i++) {
+        const y = padT + (i/4)*innerH;
+        s += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="rgba(0,0,0,0.07)" stroke-width="1" />`;
+      }
+      s += `<line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="rgba(0,0,0,0.25)" stroke-width="1" />`;
+      s += `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(0,0,0,0.25)" stroke-width="1" />`;
+
+      months.forEach((m) => {
+        const x = xForMonth(m);
+        s += `<text x="${x}" y="${H-10}" text-anchor="middle" font-size="10" fill="rgba(0,0,0,0.55)">${m}</text>`;
+      });
+
+      s += `<text x="${padL-6}" y="${padT+10}" text-anchor="end" font-size="10" fill="rgba(0,0,0,0.55)">€${Math.round(revMax/1000)}k</text>`;
+      s += `<text x="${padL-6}" y="${H-padB}" text-anchor="end" font-size="10" fill="rgba(0,0,0,0.55)">€${Math.round(revMin/1000)}k</text>`;
+
+      points.forEach((p) => {
+        const x = xForMonth(p.month);
+        const y = yForRevenue(p.revenue);
+        const r = radiusForRevenue(p.revenue);
+        const jx = rand(-6, 6);
+        const jy = rand(-4, 4);
+        s += `
+          <circle cx="${x + jx}" cy="${y + jy}" r="${r}"
+            fill="rgba(34,197,94,0.18)" stroke="rgba(253,224,71,0.95)" stroke-width="1">
+            <title>${escapeHtml(p.customer)} • ${escapeHtml(p.month)} • €${Math.round(p.revenue).toLocaleString()}</title>
+          </circle>
+        `;
+      });
+
+      bubbleSvg.innerHTML = s;
+    }
+
+    function renderLineChart() {
+      const W = 420, H = 160;
+      const padL = 32, padR = 12, padT = 14, padB = 28;
+      const innerW = W - padL - padR;
+      const innerH = H - padT - padB;
+
+      const points = Array.from({length: 10}).map((_, i) => ({
+        x: i,
+        y: Math.max(5, Math.min(95, Math.round(20 + Math.random()*60)))
+      }));
+
+      const xFor = (i) => padL + (i/(points.length-1))*innerW;
+      const yFor = (v) => padT + (1 - v/100)*innerH;
+
+      let s = "";
+      for (let i=0;i<=4;i++) {
+        const y = padT + (i/4)*innerH;
+        s += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="rgba(0,0,0,0.07)" stroke-width="1" />`;
+      }
+      s += `<line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="rgba(0,0,0,0.25)" stroke-width="1" />`;
+      s += `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(0,0,0,0.25)" stroke-width="1" />`;
+
+      const d = points.map((p, i) => `${i===0 ? "M":"L"} ${xFor(i)} ${yFor(p.y)}`).join(" ");
+      s += `<path d="${d}" fill="none" stroke="rgba(34,197,94,0.9)" stroke-width="2"/>`;
+
+      points.forEach((p, i) => {
+        s += `<circle cx="${xFor(i)}" cy="${yFor(p.y)}" r="3" fill="rgba(253,224,71,0.95)" stroke="rgba(0,0,0,0.25)" stroke-width="1">
+          <title>Week ${i+1}: ${p.y}</title>
+        </circle>`;
+      });
+
+      s += `<text x="${padL-6}" y="${padT+10}" text-anchor="end" font-size="10" fill="rgba(0,0,0,0.55)">High</text>`;
+      s += `<text x="${padL-6}" y="${H-padB}" text-anchor="end" font-size="10" fill="rgba(0,0,0,0.55)">Low</text>`;
+      for (let i=0;i<points.length;i+=2) {
+        s += `<text x="${xFor(i)}" y="${H-10}" text-anchor="middle" font-size="10" fill="rgba(0,0,0,0.55)">${i+1}</text>`;
+      }
+
+      lineSvg.innerHTML = s;
+    }
+
+    btnRegenBubbles.addEventListener("click", () => { renderBubbleChart(); toast("Bubble chart regenerated."); });
+    btnRegenLine.addEventListener("click", () => { renderLineChart(); toast("Line chart regenerated."); });
+
+    // -----------------------------
+    // Settings mode
+    // -----------------------------
+    function setModeSettings(on) {
+      appMode = on ? "settings" : "normal";
+
+      if (appMode === "settings") {
+        chatBody.dataset.mode = "settings";
+        chatBody.innerHTML = `
+          <div class="h-full grid place-items-center">
+            <div class="max-w-md text-center rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+              <div class="text-lg font-semibold">Connect your CRM to start</div>
+              <div class="text-sm text-zinc-600 mt-1">
+                Import companies, deals, contacts, and up to 180 days of activities to power customer success workflows.
+              </div>
+            </div>
+          </div>
+        `;
+        chatInput.value = "";
+        chatInput.disabled = true;
+        chatInput.placeholder = "Connect an integration to enable chat (mock).";
+        chatSub.textContent = "Settings mode: connect your CRM to populate the workspace.";
+
+        openRightExpanded();
+        rightTabsRow.classList.add("hidden");
+        hideAllRightViews();
+        rightSettingsPanel.classList.remove("hidden");
+
+        integrationPicker.classList.add("hidden");
+        importProgress.classList.add("hidden");
+        btnImportDone.classList.add("hidden");
+        btnConnectIntegration.disabled = false;
+        importSteps.innerHTML = "";
+      } else {
+        chatInput.disabled = false;
+        chatInput.placeholder = "Ask: ‘Summarize latest meeting’, ‘What are churn risks?’, ‘Draft a recap email’...";
+        chatSub.textContent = "Pick a customer and ask for next steps, risks, or summaries.";
+
+        rightTabsRow.classList.remove("hidden");
+        rightSettingsPanel.classList.add("hidden");
+        setRightTab("customers");
+
+        renderNewChatHome();
+      }
+    }
+
+    document.getElementById("btnSettings").addEventListener("click", () => {
+      setModeSettings(true);
+      toast("Opened Settings.");
+    });
+
+    btnConnectIntegration.addEventListener("click", () => {
+      integrationPicker.classList.remove("hidden");
+      toast("Pick a CRM.");
+    });
+
+    document.querySelectorAll(".btnPickCRM").forEach(btn => {
+      btn.addEventListener("click", () => startImport(btn.dataset.crm || "CRM"));
+    });
+
+    function stepRow(label, desc) {
+      return `
+        <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <div class="text-sm font-semibold">${escapeHtml(label)}</div>
+              <div class="text-xs text-zinc-600 mt-1">${escapeHtml(desc)}</div>
+            </div>
+            <div class="text-[11px] font-semibold px-2 py-1 rounded-lg bg-zinc-50 border border-zinc-200 text-zinc-700" data-stepbadge>Queued</div>
+          </div>
+          <div class="mt-3 h-2 rounded-full bg-white border border-zinc-200 overflow-hidden">
+            <div class="h-full bg-[#FDE047] w-0" data-stepbar></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function runStep(el, ms) {
+      const badge = el.querySelector("[data-stepbadge]");
+      const bar = el.querySelector("[data-stepbar]");
+      badge.textContent = "Importing";
+      badge.className = "text-[11px] font-semibold px-2 py-1 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-800";
+      bar.style.width = "0%";
+
+      const start = Date.now();
+      const tick = setInterval(() => {
+        const t = (Date.now() - start) / ms;
+        const pct = Math.min(100, Math.round(t * 100));
+        bar.style.width = pct + "%";
+        if (pct >= 100) {
+          clearInterval(tick);
+          badge.textContent = "Done";
+          badge.className = "text-[11px] font-semibold px-2 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700";
+        }
+      }, 80);
+
+      return new Promise(resolve => setTimeout(resolve, ms + 120));
+    }
+
+    async function startImport(crmName) {
+      integrationPicker.classList.add("hidden");
+      importProgress.classList.remove("hidden");
+      importMeta.textContent = `${crmName} • Import pipeline running (mock)`;
+      importBadge.textContent = "Running";
+      importBadge.className = "text-[11px] font-semibold px-2 py-1 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-800";
+      btnImportDone.classList.add("hidden");
+
+      const steps = [
+        { label:"Step 1: Company", desc:"Import companies/accounts and normalize identifiers." },
+        { label:"Step 2: Opportunities / Deals", desc:"Import deals and group them by company for pipeline visibility." },
+        { label:"Step 3: Contact", desc:"Backfill contacts from opportunities and companies." },
+        { label:"Activities (last 180 days)", desc:"Import Meetings and Notes to power CS workflows." },
+      ];
+
+      importSteps.innerHTML = steps.map(s => stepRow(s.label, s.desc)).join("");
+      const stepEls = Array.from(importSteps.children);
+
+      for (let i=0;i<stepEls.length;i++) {
+        await runStep(stepEls[i], 2200 + (i * 600));
+      }
+
+      importBadge.textContent = "Complete";
+      importBadge.className = "text-[11px] font-semibold px-2 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700";
+      btnImportDone.classList.remove("hidden");
+      toast("Import complete (mock).");
+    }
+
+    btnImportDone.addEventListener("click", () => {
+      setModeSettings(false);
+      toast("Workspace ready.");
+    });
+
+    // -----------------------------
+    // Toast
+    // -----------------------------
+    let toastTimer = null;
+    function toast(msg) {
+      clearTimeout(toastTimer);
+      let el = document.getElementById("toast");
+      if (!el) {
+        el = document.createElement("div");
+        el.id = "toast";
+        el.className = "fixed bottom-4 left-1/2 -translate-x-1/2 z-[80] rounded-2xl bg-zinc-900 text-white px-4 py-2 text-sm shadow-lg";
+        document.body.appendChild(el);
+      }
+      el.textContent = msg;
+      el.style.opacity = "1";
+      toastTimer = setTimeout(() => { el.style.opacity = "0"; }, 1600);
+    }
+
+    // -----------------------------
+    // Boot
+    // -----------------------------
+    fillCompanySelects();
+    renderCustomerDetail();
+    renderActivities();
+    renderAllRecs();
+    renderDashboardLists();
+    renderBubbleChart();
+    renderLineChart();
+
+    setRightTab("customers");
+
+    // initial: both panels collapsed (menus visible on both sides)
+    applyDrawerLayout();
+    showActivityList();
+    renderNewChatHome();
+  </script>
+</body>
+</html>
+
