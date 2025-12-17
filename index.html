@@ -1,0 +1,2278 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TIDUSS - Customer Intelligence Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FDE047',
+                        secondary: '#3B82F6',
+                        success: '#10B981',
+                        warning: '#F59E0B',
+                        danger: '#EF4444'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .chat-message-user {
+            border-radius: 18px 18px 4px 18px;
+        }
+
+        .chat-message-ai {
+            border-radius: 18px 18px 18px 4px;
+        }
+
+        .record-pulse {
+            animation: recordPulse 1.5s infinite;
+        }
+
+        @keyframes recordPulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
+        }
+
+        .seg-btn.active {
+            background: rgba(253, 224, 71, 0.7);
+            border-color: rgba(253, 224, 71, 1);
+            color: #18181b;
+        }
+
+        .seg-btn {
+            border: 1px solid #e4e4e7;
+            background: #fff;
+        }
+
+        /* ✅ PUSH (NOT OVERLAY) SIDE PANELS + smoother slide */
+        .panel {
+            will-change: width, transform, opacity;
+            transition:
+                width 480ms cubic-bezier(.22, .8, .2, 1),
+                transform 480ms cubic-bezier(.22, .8, .2, 1),
+                opacity 260ms ease;
+        }
+
+        /* Left panel */
+        .panel-left {
+            width: 18rem;
+            min-width: 18rem;
+        }
+
+        .panel-left.collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            transform: translateX(-14px);
+            opacity: 0;
+            pointer-events: none;
+            overflow: hidden;
+            border-right: 0 !important;
+        }
+
+        /* Right panel sizing via CSS variable (pushes, no overlay) */
+        .panel-right {
+            --right-w: 50vw;
+            width: var(--right-w);
+            min-width: 420px;
+            max-width: 900px;
+        }
+
+        .panel-right.narrow {
+            --right-w: 25vw;
+            min-width: 380px;
+            max-width: 560px;
+        }
+
+        .panel-right.collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            max-width: 0 !important;
+            transform: translateX(14px);
+            opacity: 0;
+            pointer-events: none;
+            overflow: hidden;
+            border-left: 0 !important;
+        }
+
+        /* keep push behavior even on smaller screens (no overlay) */
+        @media (max-width: 1024px) {
+            .panel-right {
+                --right-w: 100vw;
+                min-width: 0;
+                max-width: none;
+            }
+
+            .panel-left {
+                width: 16rem;
+                min-width: 16rem;
+            }
+        }
+
+        /* Writing email animation */
+        .typing-dots span {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 999px;
+            background: #94a3b8;
+            margin: 0 2px;
+            animation: dotPulse 1s infinite ease-in-out;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: .15s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: .3s;
+        }
+
+        @keyframes dotPulse {
+
+            0%,
+            100% {
+                transform: translateY(0);
+                opacity: .55;
+            }
+
+            50% {
+                transform: translateY(-3px);
+                opacity: 1;
+            }
+        }
+
+        /* Processing spinner */
+        .spin {
+            animation: spin 0.9s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Top nav pills */
+        .topnav-btn {
+            border: 1px solid #e4e4e7;
+            background: #fff;
+        }
+
+        .topnav-btn.active {
+            background: rgba(59, 130, 246, .10);
+            border-color: rgba(59, 130, 246, .35);
+            color: #1d4ed8;
+        }
+    </style>
+</head>
+
+<body class="bg-zinc-100 text-zinc-900 font-sans h-screen overflow-hidden">
+
+    <!-- Login Page -->
+    <div id="loginPage" class="min-h-screen overflow-auto flex flex-col items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-zinc-100">
+        <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 fade-in">
+            <div class="flex items-center justify-center gap-3 mb-8">
+                <div class="h-12 w-12 rounded-xl bg-[#FDE047] grid place-items-center">
+                    <!-- TIDUSS Vertical Bars Logo -->
+                   <!-- TIDUSS Horizontal Bars Logo (rotated) -->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 64 64"
+  class="h-full w-full"
+  aria-label="TIDUSS Logo"
+  style="transform: rotate(90deg);"
+>
+  <g fill="#18181b">
+    <!-- short -->
+    <rect x="21" y="6"  width="22" height="6" rx="3" />
+    <!-- long -->
+    <rect x="15" y="16" width="33" height="6" rx="3" />
+    <!-- short -->
+    <rect x="21" y="26" width="22" height="6" rx="3" />
+    <!-- long -->
+    <rect x="15" y="36" width="33" height="6" rx="3" />
+    <!-- short -->
+    <rect x="21" y="46" width="22" height="6" rx="3" />
+  </g>
+</svg>
+
+
+                </div>
+                <div>
+                    <div class="text-2xl font-bold leading-tight">TIDUSS</div>
+                    <div class="text-sm text-zinc-500 leading-tight">Customer Intelligence Platform</div>
+                </div>
+            </div>
+
+            <h1 class="text-2xl font-bold text-center mb-2">Welcome back</h1>
+            <p class="text-zinc-600 text-center mb-8">Sign in to your workspace to continue</p>
+
+            <form id="loginForm" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-zinc-700 mb-1">Email or Username</label>
+                    <input type="text" id="username" required class="w-full px-4 py-3 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-zinc-700 mb-1">Password</label>
+                    <input type="password" id="password" required class="w-full px-4 py-3 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition">
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="remember" class="h-4 w-4 text-primary rounded border-zinc-300 focus:ring-primary">
+                        <label for="remember" class="ml-2 text-sm text-zinc-600">Remember me</label>
+                    </div>
+                    <a href="#" class="text-sm text-secondary hover:underline">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="w-full bg-primary hover:bg-yellow-500 text-zinc-900 font-semibold py-3 rounded-lg transition duration-200 transform hover:-translate-y-0.5 active:translate-y-0">
+                    Sign In
+                </button>
+
+                <p class="text-center text-sm text-zinc-500 mt-6">
+                    This is a demo login. Use any credentials to continue.
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="hidden h-screen flex flex-col">
+        <!-- Top Bar -->
+        <header class="shrink-0 sticky top-0 z-50 border-b border-zinc-200 bg-white/90 backdrop-blur">
+            <div class="w-full px-6 py-3 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="h-8 w-8 rounded-xl bg-[#FDE047] grid place-items-center">
+                        <svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 64 64"
+  class="h-full w-full"
+  aria-label="TIDUSS Logo"
+  style="transform: rotate(90deg);"
+>
+  <g fill="#18181b">
+    <!-- short -->
+    <rect x="21" y="6"  width="22" height="6" rx="3" />
+    <!-- long -->
+    <rect x="15" y="16" width="33" height="6" rx="3" />
+    <!-- short -->
+    <rect x="21" y="26" width="22" height="6" rx="3" />
+    <!-- long -->
+    <rect x="15" y="36" width="33" height="6" rx="3" />
+    <!-- short -->
+    <rect x="21" y="46" width="22" height="6" rx="3" />
+  </g>
+</svg>
+                    </div>
+                    <div>
+                        <div class="font-semibold leading-tight">TIDUSS</div>
+                        <div class="text-xs text-zinc-500 leading-tight">Customer Intelligence Platform</div>
+                    </div>
+
+                    <!-- ✅ Top menu: Dashboard only (no Chat button) -->
+                    <div class="hidden md:flex items-center gap-2 ml-3">
+                        <button id="navDashboardBtn" class="topnav-btn text-sm font-semibold px-3 py-2 rounded-lg flex items-center gap-2">
+                            <i class="fas fa-chart-line text-zinc-500"></i> Dashboard
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div class="text-sm text-zinc-700 hidden md:block">Welcome, <span class="font-semibold" id="userName">Alex Johnson</span></div>
+                    <div class="h-8 w-8 rounded-full bg-zinc-200 flex items-center justify-center cursor-pointer">
+                        <i class="fas fa-user text-zinc-600"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile top menu (Dashboard only) -->
+            <div class="md:hidden px-6 pb-3">
+                <button id="navDashboardBtn_m" class="topnav-btn text-sm font-semibold px-3 py-2 rounded-lg w-full flex items-center justify-center gap-2">
+                    <i class="fas fa-chart-line text-zinc-500"></i> Dashboard
+                </button>
+            </div>
+        </header>
+
+        <div class="flex-1 min-h-0 relative">
+            <div class="flex h-full min-h-0 relative">
+
+                <!-- Left Panel (PUSHES, no overlay) -->
+                <aside id="leftPanel" class="panel panel-left border-r border-zinc-200 bg-white flex flex-col min-h-0">
+                    <div class="p-4 flex-1 min-h-0 overflow-y-auto">
+                        <h2 class="font-bold text-lg mb-4 flex items-center justify-between">
+                            AI Recommendations
+                            <button id="collapseLeftPanel" class="text-zinc-400 hover:text-zinc-700" title="Collapse">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                        </h2>
+
+                        <div id="aiRecommendations" class="space-y-3"></div>
+
+                        <div class="mt-8">
+                            <h3 class="font-bold mb-3">Upcoming Activities</h3>
+                            <div id="upcomingActivities" class="space-y-3"></div>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Center (Chat OR Global Dashboard) -->
+                <main class="flex-1 flex flex-col min-w-0 min-h-0">
+
+                    <!-- CHAT VIEW -->
+                    <section id="chatView" class="flex-1 min-h-0 flex flex-col min-w-0">
+                        <div class="border-b border-zinc-200 bg-white p-4 shrink-0">
+                            <div class="flex items-center justify-between">
+                                <h1 class="text-xl font-bold">TIDUSS Assistant</h1>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs text-success bg-green-50 px-2 py-1 rounded-full flex items-center gap-1">
+                                        <i class="fas fa-circle text-xs"></i> Online
+                                    </span>
+                                    <button id="expandLeftPanel" class="text-zinc-400 hover:text-zinc-700 hidden" title="Show recommendations panel">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                    <button id="expandRightPanelFromChat" class="text-zinc-400 hover:text-zinc-700" title="Show customer details">
+                                        <i class="fas fa-rectangle-list"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="text-sm text-zinc-500 mt-1">Your AI-powered assistant for customer success</p>
+                        </div>
+
+                        <div id="chatContainer" class="flex-1 min-h-0 overflow-y-auto p-4 space-y-6">
+                            <div class="chat-message-ai bg-white p-4 rounded-xl shadow-sm max-w-3xl">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <div class="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
+                                        <i class="fas fa-robot text-zinc-900"></i>
+                                    </div>
+                                    <span class="font-semibold">TIDUSS Assistant</span>
+                                    <span class="text-xs text-zinc-500 ml-auto">Just now</span>
+                                </div>
+                                <p class="text-zinc-700">Hello <span id="greetingName">Alex</span>! 👋 Welcome back to your workspace.</p>
+
+                                <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                                    <p class="font-medium text-blue-800 mb-2">I have 3 CRM recommendations for your customers:</p>
+                                    <div class="space-y-2">
+                                        <div class="flex items-center justify-between p-2 hover:bg-blue-100 rounded cursor-pointer">
+                                            <div class="flex items-center gap-2">
+                                                <div class="h-6 w-6 rounded-full bg-danger/20 flex items-center justify-center">
+                                                    <i class="fas fa-exclamation-triangle text-danger text-xs"></i>
+                                                </div>
+                                                <span>Follow up with TechCorp — Health score dropped 5%</span>
+                                            </div>
+                                            <i class="fas fa-chevron-right text-blue-500"></i>
+                                        </div>
+                                        <div class="flex items-center justify-between p-2 hover:bg-blue-100 rounded cursor-pointer">
+                                            <div class="flex items-center gap-2">
+                                                <div class="h-6 w-6 rounded-full bg-warning/20 flex items-center justify-center">
+                                                    <i class="fas fa-file-contract text-warning text-xs"></i>
+                                                </div>
+                                                <span>Review Global Inc contract — Renewal in 30 days</span>
+                                            </div>
+                                            <i class="fas fa-chevron-right text-blue-500"></i>
+                                        </div>
+                                        <div class="flex items-center justify-between p-2 hover:bg-blue-100 rounded cursor-pointer">
+                                            <div class="flex items-center gap-2">
+                                                <div class="h-6 w-6 rounded-full bg-success/20 flex items-center justify-center">
+                                                    <i class="fas fa-handshake text-success text-xs"></i>
+                                                </div>
+                                                <span>Send proposal to Innovate Co — High engagement</span>
+                                            </div>
+                                            <i class="fas fa-chevron-right text-blue-500"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <p class="mt-4 text-zinc-700">Would you like to <span class="font-medium text-secondary cursor-pointer hover:underline" id="viewUpcomingBtn">view upcoming activities</span> or pick one of these recommendations?</p>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-zinc-200 bg-white p-4 shrink-0">
+                            <div class="flex gap-2">
+                                <input type="text" id="chatInput" placeholder="Ask TIDUSS Assistant anything..." class="flex-1 px-4 py-3 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition">
+                                <button id="sendMessage" class="bg-primary hover:bg-yellow-500 text-zinc-900 font-semibold px-6 rounded-lg transition">
+                                    Send
+                                </button>
+                            </div>
+                            <div class="mt-2 text-xs text-zinc-500">
+                                <i class="fas fa-lightbulb mr-1"></i> Try: "Show me upcoming activities with Apple" or "Draft a follow-up email"
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- GLOBAL DASHBOARD VIEW -->
+                    <section id="dashboardView" class="hidden flex-1 min-h-0 flex flex-col min-w-0">
+                        <div class="border-b border-zinc-200 bg-white p-4 shrink-0">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="h-9 w-9 rounded-xl bg-secondary/15 grid place-items-center">
+                                            <i class="fas fa-chart-line text-secondary"></i>
+                                        </div>
+                                        <div>
+                                            <h1 class="text-xl font-bold">AI Dashboard</h1>
+                                            <p class="text-sm text-zinc-500">Prompt TIDUSS to generate widgets (demo simulation).</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3 inline-flex items-center gap-2 text-xs font-medium bg-zinc-50 border border-zinc-200 rounded-full px-3 py-1">
+                                        <i class="fas fa-filter text-zinc-500"></i>
+                                        Context: <span class="font-semibold" id="dashboardContextLabel">All customers</span>
+                                    </div>
+                                </div>
+
+                                <!-- ✅ Back button on dashboard page -->
+                                <button id="backToChatBtn" class="border border-zinc-200 hover:bg-zinc-50 px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-2">
+                                    <i class="fas fa-arrow-left text-zinc-500"></i> Back
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex-1 min-h-0 overflow-y-auto p-4">
+                            <div class="max-w-4xl mx-auto space-y-4">
+                                <!-- ✅ slimmer widget box -->
+                                <div class="p-3 rounded-2xl border border-zinc-200 bg-white">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div>
+                                            <div class="font-bold text-base">Generate widgets</div>
+                                            <div class="text-xs text-zinc-500 mt-1">Use prompts to create dashboard cards (demo).</div>
+                                        </div>
+                                        <span class="text-xs px-2 py-1 rounded-full bg-primary/30 text-zinc-900 font-semibold">AI Widgets</span>
+                                    </div>
+
+                                    <div class="mt-2">
+                                        <label class="text-xs text-zinc-500">Prompt</label>
+                                        <textarea id="globalDashboardPrompt" class="mt-2 w-full min-h-[72px] px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" placeholder="Example: 'Show churn risk by segment and revenue trend for last 90 days'"></textarea>
+                                        <div class="mt-2 flex gap-2">
+                                            <button id="globalGenerateWidgetBtn" class="flex-1 bg-secondary hover:bg-blue-600 text-white font-semibold py-2 rounded-lg transition flex items-center justify-center gap-2">
+                                                <i class="fas fa-wand-magic-sparkles"></i> Generate
+                                            </button>
+                                            <button id="globalClearWidgetsBtn" class="border border-zinc-200 hover:bg-zinc-50 font-medium py-2 px-3 rounded-lg">
+                                                Clear
+                                            </button>
+                                        </div>
+                                        <div id="globalWidgetGenStatus" class="hidden mt-2 text-xs text-zinc-600 flex items-center gap-2">
+                                            <i class="fas fa-gear spin text-secondary"></i> Generating…
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="globalDashboardWidgets"></div>
+                            </div>
+                        </div>
+                    </section>
+
+                </main>
+
+                <!-- Right Panel (PUSHES, no overlay) -->
+                <aside id="rightPanel" class="panel panel-right collapsed border-l border-zinc-200 bg-white flex flex-col min-h-0">
+                    <div class="p-4 flex-1 min-h-0 overflow-y-auto">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="font-bold text-lg flex items-center gap-2">
+                                Customer Details
+                                <span class="text-xs text-zinc-500 font-medium" id="panelSizePill">1/2</span>
+                            </h2>
+                            <div class="flex items-center gap-2">
+                                <button id="toggleRightPanelSize" class="text-zinc-400 hover:text-zinc-700 border border-zinc-200 rounded-lg px-2 py-1 text-xs" title="Toggle width">
+                                    <i class="fas fa-compress"></i>
+                                </button>
+                                <button id="collapseRightPanel" class="text-zinc-400 hover:text-zinc-700" title="Collapse">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Customer selector -->
+                        <div class="mb-4">
+                            <label class="text-xs text-zinc-500 font-medium">Selected customer</label>
+                            <div class="mt-1 flex gap-2">
+                                <select id="customerSelect" class="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-white"></select>
+
+                                <button id="openCustomerDashboardBtn" class="shrink-0 border border-zinc-200 hover:bg-zinc-50 px-3 rounded-lg text-sm font-medium flex items-center gap-2" title="Open dashboard for this customer">
+                                    <i class="fas fa-chart-line text-zinc-500"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="customerHeader" class="mb-6">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-xl" id="customerAvatar">X</div>
+                                <div class="min-w-0">
+                                    <h3 class="font-bold text-xl truncate" id="customerName">XYZ Corporation</h3>
+                                    <p class="text-zinc-500 text-sm">Technology • Enterprise Customer</p>
+                                </div>
+                            </div>
+
+                            <div class="mb-4 p-3 rounded-xl border border-zinc-200 bg-gradient-to-br from-white to-zinc-50">
+                                <div class="flex items-center justify-between">
+                                    <div class="text-sm text-zinc-500 flex items-center gap-2">
+                                        <i class="fas fa-coins text-warning"></i> MRR
+                                    </div>
+                                    <div class="font-bold text-lg" id="mrrValue">$0</div>
+                                </div>
+                                <div class="text-xs text-zinc-500 mt-1">Current monthly recurring revenue for this customer.</div>
+                            </div>
+
+                            <div class="mb-3 p-4 rounded-xl border border-zinc-200 bg-white">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-semibold flex items-center gap-2">
+                                        <i class="fas fa-heartbeat text-danger"></i> Health Score
+                                    </h4>
+                                    <div class="text-right">
+                                        <div class="text-xs text-zinc-500">Overall</div>
+                                        <div class="font-black text-2xl leading-tight" id="healthOverallValue">—</div>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-3 gap-3 mt-3">
+                                    <div class="p-3 rounded-lg bg-zinc-50 border border-zinc-200">
+                                        <div class="text-xs text-zinc-500 flex items-center gap-2"><i class="fas fa-user-group"></i> Customers</div>
+                                        <div class="mt-1 flex items-end justify-between">
+                                            <div class="font-bold text-lg" id="hsCustomersVal">—</div>
+                                            <span class="text-xs text-zinc-500">/100</span>
+                                        </div>
+                                        <div class="mt-2 h-2 bg-zinc-200 rounded-full overflow-hidden">
+                                            <div class="h-2 bg-success rounded-full" id="hsCustomersBar" style="width:0%"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="p-3 rounded-lg bg-zinc-50 border border-zinc-200">
+                                        <div class="text-xs text-zinc-500 flex items-center gap-2"><i class="fas fa-diagram-project"></i> CRM</div>
+                                        <div class="mt-1 flex items-end justify-between">
+                                            <div class="font-bold text-lg" id="hsCrmVal">—</div>
+                                            <span class="text-xs text-zinc-500">/100</span>
+                                        </div>
+                                        <div class="mt-2 h-2 bg-zinc-200 rounded-full overflow-hidden">
+                                            <div class="h-2 bg-warning rounded-full" id="hsCrmBar" style="width:0%"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="p-3 rounded-lg bg-zinc-50 border border-zinc-200">
+                                        <div class="text-xs text-zinc-500 flex items-center gap-2"><i class="fas fa-chart-area"></i> Usage</div>
+                                        <div class="mt-1 flex items-end justify-between">
+                                            <div class="font-bold text-lg" id="hsUsageVal">—</div>
+                                            <span class="text-xs text-zinc-500">/100</span>
+                                        </div>
+                                        <div class="mt-2 h-2 bg-zinc-200 rounded-full overflow-hidden">
+                                            <div class="h-2 bg-secondary rounded-full" id="hsUsageBar" style="width:0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4">
+                                    <div class="text-xs text-zinc-500 mb-1">Overall score (average of the 3 components)</div>
+                                    <div class="h-2 w-full bg-zinc-200 rounded-full overflow-hidden">
+                                        <div class="h-2 bg-gradient-to-r from-danger via-warning to-success rounded-full" id="hsOverallBar" style="width:0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-6 p-4 rounded-xl border border-zinc-200 bg-gradient-to-br from-white to-zinc-50">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <div class="h-9 w-9 rounded-xl bg-primary/40 grid place-items-center">
+                                            <i class="fas fa-wand-magic-sparkles text-zinc-900"></i>
+                                        </div>
+                                        <div>
+                                            <div class="font-semibold leading-tight">Smart Score</div>
+                                            <div class="text-xs text-zinc-500 leading-tight">AI confidence score (health + revenue signals)</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-xs text-zinc-500">Score</div>
+                                        <div class="font-black text-2xl leading-tight" id="smartScoreValue">—</div>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <div class="h-2 w-full bg-zinc-200 rounded-full overflow-hidden">
+                                        <div class="h-2 bg-secondary rounded-full" id="smartScoreBar" style="width:0%"></div>
+                                    </div>
+                                    <div class="mt-2 text-xs text-zinc-500" id="smartScoreHint">—</div>
+                                </div>
+                            </div>
+
+                            <div class="flex border-b border-zinc-200 mb-4 overflow-x-auto">
+                                <button class="tab-btn active px-4 py-2 font-medium text-secondary border-b-2 border-secondary whitespace-nowrap" data-tab="recommendations">Recommendations</button>
+                                <button class="tab-btn px-4 py-2 font-medium text-zinc-500 hover:text-zinc-700 whitespace-nowrap border-b-2 border-transparent" data-tab="activities">Activities</button>
+                                <button class="tab-btn px-4 py-2 font-medium text-zinc-500 hover:text-zinc-700 whitespace-nowrap border-b-2 border-transparent" data-tab="contracts">Contracts</button>
+                            </div>
+
+                            <div id="tabContent">
+                                <div id="recommendationsTab" class="tab-panel active space-y-4"></div>
+
+                                <div id="activitiesTab" class="tab-panel hidden">
+                                    <div id="meetingWorkspace" class="hidden mb-4 p-4 rounded-xl border border-zinc-200 bg-gradient-to-br from-white to-zinc-50">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <div>
+                                                <div class="text-sm text-zinc-500">Meeting workspace</div>
+                                                <div class="font-bold text-lg leading-tight">Post-call tools</div>
+                                                <div class="text-xs text-zinc-500 mt-1">Review transcript + summary and trigger next best actions.</div>
+                                            </div>
+                                            <span class="text-xs px-2 py-1 rounded-full bg-success/15 text-success font-medium flex items-center gap-1">
+                                                <i class="fas fa-check"></i> Transcript saved
+                                            </span>
+                                        </div>
+
+                                        <div class="mt-3 grid grid-cols-2 gap-2">
+                                            <button class="seg-btn rounded-lg px-3 py-2 text-sm font-medium flex items-center gap-2 active" data-mtab="upcoming">
+                                                <i class="far fa-calendar"></i> Meetings (upcoming)
+                                            </button>
+                                            <button class="seg-btn rounded-lg px-3 py-2 text-sm font-medium flex items-center gap-2" data-mtab="summary">
+                                                <i class="fas fa-wand-magic-sparkles"></i> Transcript summary
+                                            </button>
+                                            <button class="seg-btn rounded-lg px-3 py-2 text-sm font-medium flex items-center gap-2" data-mtab="notes">
+                                                <i class="far fa-note-sticky"></i> Notes
+                                            </button>
+                                            <button class="seg-btn rounded-lg px-3 py-2 text-sm font-medium flex items-center gap-2" data-mtab="transcript">
+                                                <i class="far fa-file-lines"></i> Transcript
+                                            </button>
+                                        </div>
+
+                                        <div class="mt-3">
+                                            <div id="mtab_upcoming" class="mtab-panel">
+                                                <div class="flex items-center justify-between">
+                                                    <div class="font-semibold">Upcoming meetings</div>
+                                                    <button class="text-xs font-medium text-secondary hover:underline" data-hide-mw>Back to activity list</button>
+                                                </div>
+                                                <div class="mt-2 space-y-2" id="upcomingMeetingsList"></div>
+                                            </div>
+
+                                            <div id="mtab_summary" class="mtab-panel hidden">
+                                                <div class="flex items-center justify-between">
+                                                    <div class="font-semibold">Transcript summary</div>
+                                                    <button class="text-xs font-medium text-secondary hover:underline" data-hide-mw>Back to activity list</button>
+                                                </div>
+
+                                                <div class="mt-2 p-3 rounded-lg bg-white border border-zinc-200">
+                                                    <div class="text-xs text-zinc-500 mb-2">Latest meeting</div>
+                                                    <div class="font-medium" id="summaryTitle">—</div>
+
+                                                    <div id="summaryProcessing" class="mt-3 p-3 rounded-lg border border-zinc-200 bg-zinc-50">
+                                                        <div class="flex items-center gap-2 text-sm font-medium text-zinc-700">
+                                                            <i class="fas fa-gear spin text-secondary"></i>
+                                                            Processing transcript summary…
+                                                        </div>
+                                                        <div class="text-xs text-zinc-500 mt-1">This takes a few seconds.</div>
+                                                        <div class="mt-3 h-2 bg-zinc-200 rounded-full overflow-hidden">
+                                                            <div id="summaryProcessingBar" class="h-2 bg-secondary rounded-full" style="width:15%"></div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="mt-2 text-sm text-zinc-700 hidden" id="summaryBody"></div>
+
+                                                    <div class="mt-4 p-3 rounded-lg bg-blue-50 border border-blue-100">
+                                                        <div class="flex items-center justify-between gap-2">
+                                                            <div class="text-sm font-medium text-blue-900 flex items-center gap-2">
+                                                                <i class="fas fa-robot"></i> Ask AI
+                                                            </div>
+                                                            <button id="askAiBtn" class="bg-secondary hover:bg-blue-600 text-white text-sm font-semibold px-3 py-2 rounded-lg transition">
+                                                                Ask AI
+                                                            </button>
+                                                        </div>
+                                                        <div class="text-xs text-blue-800 mt-1">Ask AI will continue in chat (email draft, next actions, etc.).</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div id="mtab_notes" class="mtab-panel hidden">
+                                                <div class="flex items-center justify-between">
+                                                    <div class="font-semibold">Notes</div>
+                                                    <button class="text-xs font-medium text-secondary hover:underline" data-hide-mw>Back to activity list</button>
+                                                </div>
+                                                <div class="mt-2 p-3 rounded-lg bg-white border border-zinc-200">
+                                                    <label class="text-xs text-zinc-500">Meeting notes</label>
+                                                    <textarea id="meetingNotes" class="mt-2 w-full min-h-[140px] px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" placeholder="Write key points, risks, decisions, and next steps..."></textarea>
+                                                    <div class="mt-2 flex gap-2">
+                                                        <button id="saveNotesBtn" class="flex-1 bg-primary hover:bg-yellow-500 text-zinc-900 font-semibold py-2 rounded-lg transition">
+                                                            Save notes
+                                                        </button>
+                                                        <button id="clearNotesBtn" class="flex-1 border border-zinc-300 hover:bg-white font-medium py-2 rounded-lg transition">
+                                                            Clear
+                                                        </button>
+                                                    </div>
+                                                    <div id="notesSavedToast" class="hidden mt-2 text-xs text-success flex items-center gap-2"><i class="fas fa-check"></i> Notes saved.</div>
+                                                </div>
+                                            </div>
+
+                                            <div id="mtab_transcript" class="mtab-panel hidden">
+                                                <div class="flex items-center justify-between">
+                                                    <div class="font-semibold">Transcript</div>
+                                                    <button class="text-xs font-medium text-secondary hover:underline" data-hide-mw>Back to activity list</button>
+                                                </div>
+                                                <div class="mt-2 p-3 rounded-lg bg-white border border-zinc-200">
+                                                    <div class="text-xs text-zinc-500 mb-2">Latest transcript</div>
+                                                    <div id="savedTranscriptView" class="text-sm text-zinc-700 whitespace-pre-wrap bg-zinc-50 border border-zinc-200 rounded-lg p-3 max-h-72 overflow-y-auto"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4 flex gap-2">
+                                        <button class="flex-1 bg-primary hover:bg-yellow-500 text-zinc-900 font-semibold py-2 rounded-lg transition flex items-center justify-center gap-2">
+                                            <i class="fas fa-plus"></i> Add New Activity
+                                        </button>
+                                        <button id="hideMeetingWorkspace" class="hidden border border-zinc-300 hover:bg-white font-medium py-2 px-3 rounded-lg transition" title="Hide post-call tools">
+                                            <i class="fas fa-eye-slash"></i>
+                                        </button>
+                                    </div>
+
+                                    <div id="customerActivities" class="space-y-3"></div>
+                                </div>
+
+                                <div id="contractsTab" class="tab-panel hidden">
+                                    <div class="space-y-4">
+                                        <div class="p-3 border border-zinc-200 rounded-lg">
+                                            <div class="flex justify-between items-center mb-2">
+                                                <h5 class="font-semibold">Enterprise Plan</h5>
+                                                <span class="text-xs bg-success/20 text-success px-2 py-1 rounded-full">Active</span>
+                                            </div>
+                                            <p class="text-sm text-zinc-600 mb-2">Renewal date: <span class="font-medium">Dec 15, 2025</span></p>
+                                            <p class="text-sm text-zinc-600">Value: <span class="font-medium">$85,000/year</span></p>
+                                        </div>
+                                        <div class="p-3 border border-zinc-200 rounded-lg">
+                                            <div class="flex justify-between items-center mb-2">
+                                                <h5 class="font-semibold">Premium Support Add-on</h5>
+                                                <span class="text-xs bg-warning/20 text-warning px-2 py-1 rounded-full">Pending</span>
+                                            </div>
+                                            <p class="text-sm text-zinc-600 mb-2">Start date: <span class="font-medium">Jan 1, 2026</span></p>
+                                            <p class="text-sm text-zinc-600">Value: <span class="font-medium">$12,000/year</span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div><!-- tabContent -->
+                        </div><!-- customerHeader -->
+                    </div>
+                </aside>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Meeting Recording Modal -->
+    <div id="meetingModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl w-full max-w-2xl mx-4 overflow-hidden fade-in">
+            <div class="p-6 border-b border-zinc-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-bold">Meeting in Progress</h3>
+                    <button id="closeMeeting" class="text-zinc-400 hover:text-zinc-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <p class="text-zinc-600 mt-1">Call with <span id="meetingCustomer">XYZ Corporation</span></p>
+            </div>
+
+            <div class="p-6">
+                <div class="flex items-center justify-center gap-3 mb-8">
+                    <div class="record-pulse h-4 w-4 rounded-full bg-danger"></div>
+                    <span class="font-semibold text-danger">Recording</span>
+                    <span class="text-zinc-500 ml-4" id="meetingTimer">00:00:01</span>
+                </div>
+
+                <div class="mb-8">
+                    <h4 class="font-semibold mb-3">Participants</h4>
+                    <div class="flex gap-4">
+                        <div class="text-center">
+                            <div class="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold mx-auto mb-1">AJ</div>
+                            <p class="text-sm">Alex Johnson</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="h-12 w-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold mx-auto mb-1">SC</div>
+                            <p class="text-sm">Sarah Chen</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="h-12 w-12 rounded-full bg-gradient-to-br from-green-500 to-teal-500 flex items-center justify-center text-white font-bold mx-auto mb-1">MP</div>
+                            <p class="text-sm">Michael Park</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-semibold mb-3">Live Transcript</h4>
+                    <div class="bg-zinc-50 rounded-lg p-4 h-64 overflow-y-auto">
+                        <div class="space-y-3" id="meetingTranscript"></div>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 mt-6">
+                    <button id="saveMeeting" class="flex-1 bg-success hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2">
+                        <i class="fas fa-save"></i> Save Transcript
+                    </button>
+                    <button id="endMeeting" class="flex-1 bg-danger hover:bg-red-600 text-white font-semibold py-3 rounded-lg transition">
+                        End Meeting
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const loginPage = document.getElementById('loginPage');
+        const mainApp = document.getElementById('mainApp');
+        const loginForm = document.getElementById('loginForm');
+        const userName = document.getElementById('userName');
+        const greetingName = document.getElementById('greetingName');
+
+        const chatView = document.getElementById('chatView');
+        const dashboardView = document.getElementById('dashboardView');
+
+        const navDashboardBtn = document.getElementById('navDashboardBtn');
+        const navDashboardBtn_m = document.getElementById('navDashboardBtn_m');
+        const backToChatBtn = document.getElementById('backToChatBtn');
+
+        const chatContainer = document.getElementById('chatContainer');
+        const chatInput = document.getElementById('chatInput');
+        const sendMessage = document.getElementById('sendMessage');
+
+        const leftPanel = document.getElementById('leftPanel');
+        const rightPanel = document.getElementById('rightPanel');
+        const expandLeftPanel = document.getElementById('expandLeftPanel');
+        const collapseLeftPanel = document.getElementById('collapseLeftPanel');
+        const collapseRightPanel = document.getElementById('collapseRightPanel');
+        const expandRightPanelFromChat = document.getElementById('expandRightPanelFromChat');
+
+        const meetingModal = document.getElementById('meetingModal');
+        const closeMeeting = document.getElementById('closeMeeting');
+        const saveMeeting = document.getElementById('saveMeeting');
+        const endMeeting = document.getElementById('endMeeting');
+        const meetingTimer = document.getElementById('meetingTimer');
+        const meetingTranscript = document.getElementById('meetingTranscript');
+        const viewUpcomingBtn = document.getElementById('viewUpcomingBtn');
+
+        const toggleRightPanelSize = document.getElementById('toggleRightPanelSize');
+        const panelSizePill = document.getElementById('panelSizePill');
+
+        // Customer selector
+        const customerSelect = document.getElementById('customerSelect');
+        const openCustomerDashboardBtn = document.getElementById('openCustomerDashboardBtn');
+
+        // Meeting workspace DOM
+        const meetingWorkspace = document.getElementById('meetingWorkspace');
+        const hideMeetingWorkspace = document.getElementById('hideMeetingWorkspace');
+        const upcomingMeetingsList = document.getElementById('upcomingMeetingsList');
+        const summaryTitle = document.getElementById('summaryTitle');
+        const summaryBody = document.getElementById('summaryBody');
+        const summaryProcessing = document.getElementById('summaryProcessing');
+        const summaryProcessingBar = document.getElementById('summaryProcessingBar');
+        const savedTranscriptView = document.getElementById('savedTranscriptView');
+        const meetingNotes = document.getElementById('meetingNotes');
+        const notesSavedToast = document.getElementById('notesSavedToast');
+
+        // Health + MRR DOM
+        const mrrValue = document.getElementById('mrrValue');
+        const healthOverallValue = document.getElementById('healthOverallValue');
+        const hsCustomersVal = document.getElementById('hsCustomersVal');
+        const hsCrmVal = document.getElementById('hsCrmVal');
+        const hsUsageVal = document.getElementById('hsUsageVal');
+        const hsCustomersBar = document.getElementById('hsCustomersBar');
+        const hsCrmBar = document.getElementById('hsCrmBar');
+        const hsUsageBar = document.getElementById('hsUsageBar');
+        const hsOverallBar = document.getElementById('hsOverallBar');
+
+        // Smart score
+        const smartScoreValue = document.getElementById('smartScoreValue');
+        const smartScoreBar = document.getElementById('smartScoreBar');
+        const smartScoreHint = document.getElementById('smartScoreHint');
+
+        // Global dashboard
+        const dashboardContextLabel = document.getElementById('dashboardContextLabel');
+        const globalDashboardPrompt = document.getElementById('globalDashboardPrompt');
+        const globalGenerateWidgetBtn = document.getElementById('globalGenerateWidgetBtn');
+        const globalClearWidgetsBtn = document.getElementById('globalClearWidgetsBtn');
+        const globalWidgetGenStatus = document.getElementById('globalWidgetGenStatus');
+        const globalDashboardWidgets = document.getElementById('globalDashboardWidgets');
+
+        // Sample data
+        const customers = {
+            'XYZ Corporation': {
+                mrr: 7200,
+                health: {
+                    customers: 78,
+                    crm: 69,
+                    usage: 70
+                },
+                contacts: [{
+                        name: 'Sarah Chen',
+                        email: 'sarah.chen@xyzcorp.com'
+                    },
+                    {
+                        name: 'Michael Park',
+                        email: 'michael.park@xyzcorp.com'
+                    }
+                ],
+                activities: [{
+                        id: 1,
+                        type: 'call',
+                        title: 'Q3 Business Review',
+                        date: 'Today, 2:00 PM',
+                        priority: 'high',
+                        participants: ['Sarah Chen', 'Michael Park']
+                    },
+                    {
+                        id: 2,
+                        type: 'meeting',
+                        title: 'Product Demo',
+                        date: 'Tomorrow, 11:00 AM',
+                        priority: 'medium',
+                        participants: ['Robert Kim']
+                    },
+                    {
+                        id: 3,
+                        type: 'email',
+                        title: 'Contract Follow-up',
+                        date: 'Oct 28, 9:00 AM',
+                        priority: 'high',
+                        participants: ['Legal Team']
+                    }
+                ],
+                recommendations: [{
+                        title: 'Discuss renewal options',
+                        description: 'Renewal in ~45 days. Prep upsell options.',
+                        priority: 'high'
+                    },
+                    {
+                        title: 'Address support tickets',
+                        description: '3 open high-priority tickets need attention.',
+                        priority: 'high'
+                    },
+                    {
+                        title: 'Share Q4 roadmap',
+                        description: 'Customer requested feature preview.',
+                        priority: 'medium'
+                    }
+                ],
+                meetingRecords: []
+            },
+            'Apple': {
+                mrr: 18500,
+                health: {
+                    customers: 90,
+                    crm: 82,
+                    usage: 92
+                },
+                contacts: [{
+                        name: 'Tim Cook',
+                        email: 'tim.cook@apple.example'
+                    },
+                    {
+                        name: 'Lisa Jackson',
+                        email: 'lisa.jackson@apple.example'
+                    }
+                ],
+                activities: [{
+                        id: 4,
+                        type: 'call',
+                        title: 'Enterprise Agreement Negotiation',
+                        date: 'Tomorrow, 3:00 PM',
+                        priority: 'high',
+                        participants: ['Tim Cook', 'Lisa Jackson']
+                    },
+                    {
+                        id: 5,
+                        type: 'meeting',
+                        title: 'Security Review',
+                        date: 'Oct 30, 1:00 PM',
+                        priority: 'high',
+                        participants: ['Security Team']
+                    },
+                    {
+                        id: 6,
+                        type: 'email',
+                        title: 'Quarterly Report',
+                        date: 'Nov 2, 10:00 AM',
+                        priority: 'medium',
+                        participants: ['Finance Department']
+                    }
+                ],
+                recommendations: [{
+                        title: 'Expand enterprise deployment',
+                        description: 'Opportunity to increase seat count by 300.',
+                        priority: 'high'
+                    },
+                    {
+                        title: 'Schedule executive briefing',
+                        description: 'C-level presentation requested next quarter.',
+                        priority: 'medium'
+                    },
+                    {
+                        title: 'Review compliance requirements',
+                        description: 'New regulations may affect setup.',
+                        priority: 'medium'
+                    }
+                ],
+                meetingRecords: []
+            }
+        };
+
+        // State
+        let currentCustomer = 'XYZ Corporation';
+        let meetingActive = false;
+        let meetingSeconds = 1;
+        let meetingInterval;
+        let lastSavedMeeting = null;
+
+        let aiFlow = {
+            stage: 'idle',
+            meetingId: null,
+            draft: null
+        };
+        let dashboardContext = 'ALL';
+
+        // Init
+        document.addEventListener('DOMContentLoaded', function() {
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('username').value || 'Alex Johnson';
+                userName.textContent = username;
+                greetingName.textContent = username.split(' ')[0];
+
+                loginPage.classList.add('hidden');
+                mainApp.classList.remove('hidden');
+
+                customerSelect.innerHTML = Object.keys(customers).map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join('');
+                customerSelect.value = currentCustomer;
+
+                loadRecommendations();
+                loadUpcomingActivities();
+                loadCustomerDetails();
+
+                showChat();
+            });
+
+            // Top nav
+            [navDashboardBtn, navDashboardBtn_m].forEach(btn => btn?.addEventListener('click', () => showDashboard('ALL')));
+            backToChatBtn.addEventListener('click', () => showChat());
+
+            // Chat
+            sendMessage.addEventListener('click', sendChatMessage);
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendChatMessage();
+            });
+
+            // Left panel toggle (push, no overlay)
+            collapseLeftPanel.addEventListener('click', closeLeftPanel);
+            expandLeftPanel.addEventListener('click', openLeftPanel);
+
+            // Right panel toggle (push, no overlay)
+            collapseRightPanel.addEventListener('click', closeRightPanel);
+            expandRightPanelFromChat.addEventListener('click', openRightPanel);
+
+            // Right panel size toggle
+            toggleRightPanelSize.addEventListener('click', () => {
+                if (rightPanel.classList.contains('narrow')) setRightPanelSize('half');
+                else setRightPanelSize('quarter');
+            });
+
+            // Customer change
+            customerSelect.addEventListener('change', () => {
+                currentCustomer = customerSelect.value;
+                loadCustomerDetails();
+                openRightPanel();
+                setRightPanelSize('half');
+            });
+
+            // Tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tab = this.getAttribute('data-tab');
+
+                    document.querySelectorAll('.tab-btn').forEach(b => {
+                        b.classList.remove('text-secondary', 'border-secondary');
+                        b.classList.add('text-zinc-500', 'border-transparent');
+                    });
+                    this.classList.add('text-secondary', 'border-secondary');
+                    this.classList.remove('text-zinc-500', 'border-transparent');
+
+                    document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.add('hidden'));
+                    document.getElementById(tab + 'Tab').classList.remove('hidden');
+
+                    if (tab === 'activities') closeLeftPanel();
+
+                    loadCustomerDetails();
+                    if (tab === 'recommendations') loadCustomerRecommendations();
+                    if (tab === 'activities') loadCustomerActivities();
+                });
+            });
+
+            // Meeting modal
+            closeMeeting.addEventListener('click', () => {
+                meetingModal.classList.add('hidden');
+                if (meetingActive) {
+                    clearInterval(meetingInterval);
+                    meetingActive = false;
+                }
+            });
+
+            saveMeeting.addEventListener('click', () => {
+                const transcriptText = collectTranscriptText();
+                const record = {
+                    id: 'm_' + Date.now(),
+                    title: findCurrentCallTitle(currentCustomer),
+                    date: new Date().toLocaleString(),
+                    participants: customers[currentCustomer].contacts.map(c => c.name),
+                    toEmails: customers[currentCustomer].contacts.map(c => c.email),
+                    transcript: transcriptText,
+                    summary: generateSummaryFromTranscript(transcriptText, currentCustomer),
+                    summaryReady: false,
+                    notes: ''
+                };
+
+                customers[currentCustomer].meetingRecords.unshift(record);
+                lastSavedMeeting = record;
+
+                meetingModal.classList.add('hidden');
+                clearInterval(meetingInterval);
+                meetingActive = false;
+
+                openRightPanel();
+                setRightPanelSize('half');
+                document.querySelector('[data-tab="activities"]').click();
+                showMeetingWorkspace(record, 'summary');
+                runSummaryProcessing(record);
+            });
+
+            endMeeting.addEventListener('click', () => {
+                meetingTimer.textContent = '01:00:00';
+                addTranscriptLine("Alex:", "Thanks everyone — I’ll send a recap and next steps shortly.");
+                addTranscriptLine("System:", "Meeting ended. You can save the transcript now.");
+            });
+
+            viewUpcomingBtn.addEventListener('click', () => {
+                chatInput.value = 'Show me upcoming activities';
+                sendChatMessage();
+            });
+
+            // Meeting workspace segment buttons
+            document.querySelectorAll('.seg-btn').forEach(btn => {
+                btn.addEventListener('click', () => switchMeetingTab(btn.getAttribute('data-mtab')));
+            });
+
+            // Hide meeting workspace
+            document.addEventListener('click', (e) => {
+                if (e.target && e.target.hasAttribute('data-hide-mw')) {
+                    meetingWorkspace.classList.add('hidden');
+                    hideMeetingWorkspace.classList.add('hidden');
+                }
+            });
+            hideMeetingWorkspace.addEventListener('click', () => {
+                meetingWorkspace.classList.add('hidden');
+                hideMeetingWorkspace.classList.add('hidden');
+            });
+
+            // Notes buttons
+            document.addEventListener('click', (e) => {
+                if (e.target && e.target.id === 'saveNotesBtn') {
+                    if (!lastSavedMeeting) return;
+                    lastSavedMeeting.notes = meetingNotes.value.trim();
+                    notesSavedToast.classList.remove('hidden');
+                    setTimeout(() => notesSavedToast.classList.add('hidden'), 1500);
+                }
+                if (e.target && e.target.id === 'clearNotesBtn') meetingNotes.value = '';
+            });
+
+            // Ask AI
+            document.addEventListener('click', (e) => {
+                if (e.target && e.target.id === 'askAiBtn') {
+                    if (!lastSavedMeeting) return addAIMessage("I don’t have a saved transcript yet. Save a meeting transcript first.");
+                    closeLeftPanel();
+                    aiFlow = {
+                        stage: 'await_yesno',
+                        meetingId: lastSavedMeeting.id,
+                        draft: null
+                    };
+                    addAIMessage(
+                        `I reviewed the last call with <strong>${escapeHtml(currentCustomer)}</strong>.<br><br>
+             Would you like me to write a follow-up email to the participants with relevant context and next steps?`,
+                        true
+                    );
+                    addChatQuickReplies([{
+                            id: 'qr_yes',
+                            label: 'Yes, draft it',
+                            icon: 'fa-envelope'
+                        },
+                        {
+                            id: 'qr_no',
+                            label: 'Not now',
+                            icon: 'fa-clock'
+                        }
+                    ]);
+                }
+            });
+
+            // NBA buttons
+            document.addEventListener('click', (e) => {
+                const btn = e.target.closest('[data-nba]');
+                if (!btn) return;
+                const action = btn.getAttribute('data-nba');
+
+                if (action === 'email') {
+                    if (!lastSavedMeeting) return addAIMessage("No transcript found yet. Save a transcript first.");
+                    closeLeftPanel();
+                    aiFlow = {
+                        stage: 'await_yesno',
+                        meetingId: lastSavedMeeting.id,
+                        draft: null
+                    };
+                    addAIMessage(`Got it. Want me to draft the follow-up email to <strong>${escapeHtml(currentCustomer)}</strong> participants?`, true);
+                    addChatQuickReplies([{
+                            id: 'qr_yes',
+                            label: 'Yes, draft it',
+                            icon: 'fa-envelope'
+                        },
+                        {
+                            id: 'qr_no',
+                            label: 'Not now',
+                            icon: 'fa-clock'
+                        }
+                    ]);
+                }
+                if (action === 'pilot') addAIMessage(`✅ Reply: <strong>"Create pilot plan"</strong>.`);
+                if (action === 'pricing') addAIMessage(`✅ Reply: <strong>"Draft pricing options"</strong>.`);
+            });
+
+            // Customer-scoped dashboard
+            openCustomerDashboardBtn.addEventListener('click', () => showDashboard(currentCustomer));
+
+            // Dashboard widgets
+            globalGenerateWidgetBtn.addEventListener('click', () => {
+                const prompt = globalDashboardPrompt.value.trim();
+                if (!prompt) return;
+
+                globalWidgetGenStatus.classList.remove('hidden');
+                globalGenerateWidgetBtn.disabled = true;
+                globalGenerateWidgetBtn.classList.add('opacity-70');
+
+                setTimeout(() => {
+                    globalWidgetGenStatus.classList.add('hidden');
+                    globalGenerateWidgetBtn.disabled = false;
+                    globalGenerateWidgetBtn.classList.remove('opacity-70');
+
+                    const widgets = buildWidgetsFromPrompt(prompt, dashboardContext);
+                    widgets.forEach(w => globalDashboardWidgets.appendChild(w));
+                    globalDashboardPrompt.value = '';
+                }, 1200);
+            });
+
+            globalClearWidgetsBtn.addEventListener('click', () => {
+                globalDashboardWidgets.innerHTML = '';
+            });
+        });
+
+        // Views
+        function showChat() {
+            dashboardView.classList.add('hidden');
+            chatView.classList.remove('hidden');
+        }
+
+        function showDashboard(context = 'ALL') {
+            dashboardContext = context;
+            closeLeftPanel();
+            closeRightPanel();
+            chatView.classList.add('hidden');
+            dashboardView.classList.remove('hidden');
+            dashboardContextLabel.textContent = (context === 'ALL') ? 'All customers' : context;
+        }
+
+        // ✅ PUSH panel helpers (no hidden overlays)
+        function closeLeftPanel() {
+            leftPanel.classList.add('collapsed');
+            expandLeftPanel.classList.remove('hidden');
+        }
+
+        function openLeftPanel() {
+            leftPanel.classList.remove('collapsed');
+            expandLeftPanel.classList.add('hidden');
+        }
+
+        function closeRightPanel() {
+            rightPanel.classList.add('collapsed');
+        }
+
+        function openRightPanel() {
+            rightPanel.classList.remove('collapsed');
+        }
+
+        function setRightPanelSize(size) {
+            if (size === 'quarter') {
+                rightPanel.classList.add('narrow');
+                panelSizePill.textContent = '1/4';
+                toggleRightPanelSize.innerHTML = '<i class="fas fa-expand"></i>';
+            } else {
+                rightPanel.classList.remove('narrow');
+                panelSizePill.textContent = '1/2';
+                toggleRightPanelSize.innerHTML = '<i class="fas fa-compress"></i>';
+            }
+        }
+
+        // Chat
+        function sendChatMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+            addUserMessage(message);
+            chatInput.value = '';
+
+            setTimeout(() => {
+                const m = message.toLowerCase().trim();
+
+                if (aiFlow.stage === 'await_yesno') {
+                    if (isAffirmative(m)) return runAskAiYes();
+                    if (isNegative(m)) return runAskAiNo();
+                }
+                if (aiFlow.stage === 'await_send') {
+                    if (m.includes('send') || m.includes('open') || isAffirmative(m)) return runAskAiOpenEmail();
+                    if (isNegative(m)) return runAskAiNoSend();
+                }
+
+                if (m.startsWith('create pilot plan')) {
+                    addAIMessage(`<strong>Pilot plan (draft)</strong><br>• Scope: 25 users<br>• Metrics: +10% WAU<br>• Timeline: setup Monday, kickoff Tuesday<br><br>Want email or doc format?`);
+                    return;
+                }
+                if (m.startsWith('draft pricing options')) {
+                    addAIMessage(`<strong>Pricing options (draft)</strong><br>1) Flat tier<br>2) Stepped tiers<br>3) Premium support add-on<br><br>Want conservative or aggressive numbers?`);
+                    return;
+                }
+
+                if (m.includes('upcoming activities')) return handleUpcomingActivities(message);
+                if (m.includes('open dashboard') || m === 'dashboard') {
+                    showDashboard('ALL');
+                    return;
+                }
+
+                addAIMessage("Try: “Show me upcoming activities with Apple” or “Dashboard”.");
+            }, 420);
+        }
+
+        function addChatQuickReplies(items) {
+            const wrap = document.createElement('div');
+            wrap.className = 'max-w-3xl';
+            wrap.innerHTML = `
+        <div class="flex flex-wrap gap-2 mt-3">
+          ${items.map(it => `
+            <button data-qr="${it.id}" class="px-3 py-2 rounded-full border border-zinc-200 bg-white hover:bg-zinc-50 text-sm font-medium flex items-center gap-2">
+              <i class="fas ${it.icon} text-zinc-500 text-xs"></i> ${escapeHtml(it.label)}
+            </button>
+          `).join('')}
+        </div>
+      `;
+            chatContainer.appendChild(wrap);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            wrap.addEventListener('click', (e) => {
+                const btn = e.target.closest('button[data-qr]');
+                if (!btn) return;
+                const id = btn.getAttribute('data-qr');
+
+                if (id === 'qr_yes') {
+                    addUserMessage("Yes");
+                    runAskAiYes();
+                }
+                if (id === 'qr_no') {
+                    addUserMessage("Not now");
+                    runAskAiNo();
+                }
+                if (id === 'qr_open') {
+                    addUserMessage("Open email");
+                    runAskAiOpenEmail();
+                }
+                if (id === 'qr_copy') {
+                    addUserMessage("Copy draft");
+                    runAskAiCopyDraft();
+                }
+            });
+        }
+
+        function addAITypingMessage(title = "Writing") {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message-ai bg-white p-4 rounded-xl shadow-sm max-w-3xl border-l-4 border-secondary';
+            messageDiv.innerHTML = `
+        <div class="flex items-center gap-2 mb-2">
+          <div class="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
+            <i class="fas fa-robot text-zinc-900"></i>
+          </div>
+          <span class="font-semibold">TIDUSS Assistant</span>
+          <span class="text-xs text-zinc-500 ml-auto">Just now</span>
+        </div>
+        <div class="text-zinc-700 flex items-center gap-2">
+          <i class="fas fa-pen-nib text-secondary"></i>
+          <span class="font-medium">${escapeHtml(title)}</span>
+          <span class="typing-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+        </div>
+      `;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            return messageDiv;
+        }
+
+        function runAskAiYes() {
+            const rec = findMeetingById(aiFlow.meetingId);
+            if (!rec) return addAIMessage("I couldn’t find the saved meeting. Try saving the transcript again.");
+
+            const typingEl = addAITypingMessage("Writing follow-up email");
+            setTimeout(() => {
+                const draft = buildFollowupEmailDraft(rec, currentCustomer);
+                aiFlow.stage = 'await_send';
+                aiFlow.draft = draft;
+
+                typingEl.querySelector('.text-zinc-700').innerHTML = `
+          Draft ready ✅<br><br>
+          <div class="bg-zinc-50 border border-zinc-200 rounded-lg p-3">
+            <div class="text-sm"><strong>To:</strong> ${escapeHtml(draft.toEmails.join(', '))}</div>
+            <div class="text-sm mt-1"><strong>Subject:</strong> ${escapeHtml(draft.subject)}</div>
+            <div class="text-sm mt-2 whitespace-pre-wrap">${escapeHtml(draft.body)}</div>
+          </div><br>
+          Would you like to send it by email? I can open your email app with it prefilled.
+        `;
+
+                addChatQuickReplies([{
+                        id: 'qr_open',
+                        label: 'Open email (prefilled)',
+                        icon: 'fa-paper-plane'
+                    },
+                    {
+                        id: 'qr_copy',
+                        label: 'Copy draft',
+                        icon: 'fa-copy'
+                    }
+                ]);
+            }, 1100);
+        }
+
+        function runAskAiNo() {
+            aiFlow = {
+                stage: 'idle',
+                meetingId: null,
+                draft: null
+            };
+            addAIMessage("No worries. You can come back anytime: Activities → Transcript summary → Ask AI.");
+        }
+
+        function runAskAiOpenEmail() {
+            if (!aiFlow.draft) return addAIMessage("I don’t have a draft yet — click Ask AI and choose “Yes” first.");
+            window.location.href = aiFlow.draft.mailto;
+            addAIMessage("Opening your email client with the draft prefilled…");
+            aiFlow = {
+                stage: 'idle',
+                meetingId: null,
+                draft: null
+            };
+        }
+
+        function runAskAiCopyDraft() {
+            if (!aiFlow.draft) return addAIMessage("No draft available yet.");
+            const text = `To: ${aiFlow.draft.toEmails.join(', ')}\nSubject: ${aiFlow.draft.subject}\n\n${aiFlow.draft.body}`;
+            try {
+                navigator.clipboard.writeText(text);
+                addAIMessage("Copied ✅");
+            } catch (_) {
+                addAIMessage("Clipboard not available — copy from the draft box.");
+            }
+        }
+
+        function runAskAiNoSend() {
+            aiFlow = {
+                stage: 'idle',
+                meetingId: null,
+                draft: null
+            };
+            addAIMessage("Okay — I’ll keep the draft here. Tell me “open email” anytime to prefill it.");
+        }
+
+        function isAffirmative(m) {
+            return ['yes', 'y', 'yeah', 'yep', 'sure', 'ok', 'okay', 'do it', 'draft it'].some(x => m === x || m.includes(x));
+        }
+
+        function isNegative(m) {
+            return ['no', 'n', 'nope', 'not now', 'later', 'skip'].some(x => m === x || m.includes(x));
+        }
+
+        function addUserMessage(text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message-user bg-primary/10 p-4 ml-auto max-w-3xl';
+            messageDiv.innerHTML = `
+        <div class="flex items-center gap-2 mb-1">
+          <div class="h-6 w-6 rounded-full bg-zinc-300 flex items-center justify-center">
+            <i class="fas fa-user text-zinc-700 text-xs"></i>
+          </div>
+          <span class="font-semibold">You</span>
+          <span class="text-xs text-zinc-500 ml-auto">Just now</span>
+        </div>
+        <p class="text-zinc-800">${escapeHtml(text)}</p>
+      `;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function addAIMessage(text, isSummary = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message-ai bg-white p-4 rounded-xl shadow-sm max-w-3xl ${isSummary ? 'border-l-4 border-secondary' : ''}`;
+            messageDiv.innerHTML = `
+        <div class="flex items-center gap-2 mb-2">
+          <div class="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
+            <i class="fas fa-robot text-zinc-900"></i>
+          </div>
+          <span class="font-semibold">TIDUSS Assistant</span>
+          <span class="text-xs text-zinc-500 ml-auto">Just now</span>
+        </div>
+        <div class="text-zinc-700">${text}</div>
+      `;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            return messageDiv;
+        }
+
+        // Left panel
+        function loadRecommendations() {
+            const container = document.getElementById('aiRecommendations');
+            container.innerHTML = '';
+
+            const recommendations = [{
+                    customer: 'XYZ Corporation',
+                    title: 'Prepare for Q3 Review',
+                    priority: 'high',
+                    icon: 'fas fa-phone'
+                },
+                {
+                    customer: 'Apple',
+                    title: 'Enterprise Agreement Review',
+                    priority: 'high',
+                    icon: 'fas fa-file-contract'
+                },
+                {
+                    customer: 'TechCorp',
+                    title: 'Follow-up on Support Tickets',
+                    priority: 'medium',
+                    icon: 'fas fa-tools'
+                },
+                {
+                    customer: 'Global Inc',
+                    title: 'Renewal Discussion',
+                    priority: 'medium',
+                    icon: 'fas fa-sync'
+                }
+            ];
+
+            recommendations.forEach(rec => {
+                const div = document.createElement('div');
+                div.className = 'p-3 border border-zinc-200 rounded-lg hover:bg-zinc-50 cursor-pointer';
+                div.innerHTML = `
+          <div class="flex items-start gap-3">
+            <div class="h-10 w-10 rounded-lg ${rec.priority === 'high' ? 'bg-danger/20' : 'bg-warning/20'} flex items-center justify-center shrink-0">
+              <i class="${rec.icon} ${rec.priority === 'high' ? 'text-danger' : 'text-warning'}"></i>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center justify-between gap-2">
+                <div class="font-medium truncate">${escapeHtml(rec.title)}</div>
+                <span class="text-[10px] px-2 py-1 rounded-full font-semibold ${rec.priority === 'high' ? 'bg-danger/15 text-danger' : 'bg-warning/15 text-warning'}">
+                  ${escapeHtml(rec.priority.toUpperCase())}
+                </span>
+              </div>
+              <div class="text-sm text-zinc-500 truncate">${escapeHtml(rec.customer)}</div>
+            </div>
+          </div>
+        `;
+                div.addEventListener('click', () => {
+                    if (!customers[rec.customer]) return;
+                    currentCustomer = rec.customer;
+                    customerSelect.value = currentCustomer;
+                    loadCustomerDetails();
+                    openRightPanel();
+                    setRightPanelSize('half');
+                });
+                container.appendChild(div);
+            });
+        }
+
+        function loadUpcomingActivities() {
+            const container = document.getElementById('upcomingActivities');
+            container.innerHTML = '';
+
+            const activities = [{
+                    customer: 'XYZ Corporation',
+                    type: 'call',
+                    title: 'Q3 Business Review',
+                    time: 'Today, 2:00 PM',
+                    priority: 'high'
+                },
+                {
+                    customer: 'Apple',
+                    type: 'meeting',
+                    title: 'Security Review',
+                    time: 'Oct 30, 1:00 PM',
+                    priority: 'high'
+                },
+                {
+                    customer: 'TechCorp',
+                    type: 'email',
+                    title: 'Proposal Follow-up',
+                    time: 'Tomorrow, 10:00 AM',
+                    priority: 'medium'
+                }
+            ];
+
+            activities.forEach(activity => {
+                const div = document.createElement('div');
+                div.className = 'p-3 border border-zinc-200 rounded-lg hover:bg-zinc-50 cursor-pointer';
+                div.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="h-8 w-8 rounded-full ${activity.type === 'call' ? 'bg-blue-100 text-blue-600' : activity.type === 'meeting' ? 'bg-purple-100 text-purple-600' : 'bg-green-100 text-green-600'} flex items-center justify-center">
+              <i class="${activity.type === 'call' ? 'fas fa-phone' : activity.type === 'meeting' ? 'fas fa-users' : 'fas fa-envelope'} text-xs"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-medium text-sm truncate">${escapeHtml(activity.title)}</div>
+              <div class="text-xs text-zinc-500 truncate">${escapeHtml(activity.customer)} • ${escapeHtml(activity.time)}</div>
+            </div>
+            <span class="text-[10px] px-2 py-1 rounded-full font-semibold ${activity.priority === 'high' ? 'bg-danger/15 text-danger' : 'bg-warning/15 text-warning'}">
+              ${escapeHtml(activity.priority.toUpperCase())}
+            </span>
+          </div>
+        `;
+                div.addEventListener('click', () => {
+                    if (!customers[activity.customer]) return;
+                    currentCustomer = activity.customer;
+                    customerSelect.value = currentCustomer;
+                    loadCustomerDetails();
+                    openRightPanel();
+                    setRightPanelSize('half');
+                    if (activity.type === 'call') startMeeting();
+                });
+                container.appendChild(div);
+            });
+        }
+
+        // Right panel
+        function loadCustomerDetails() {
+            const customer = customers[currentCustomer];
+            if (!customer) return;
+
+            document.getElementById('customerName').textContent = currentCustomer;
+            document.getElementById('meetingCustomer').textContent = currentCustomer;
+            document.getElementById('customerAvatar').textContent = (currentCustomer || 'X').slice(0, 1).toUpperCase();
+
+            mrrValue.textContent = formatMoney(customer.mrr || 0);
+
+            const hc = clamp(customer.health?.customers ?? 0, 0, 100);
+            const hcrm = clamp(customer.health?.crm ?? 0, 0, 100);
+            const hu = clamp(customer.health?.usage ?? 0, 0, 100);
+            const overall = Math.round((hc + hcrm + hu) / 3);
+
+            hsCustomersVal.textContent = hc;
+            hsCrmVal.textContent = hcrm;
+            hsUsageVal.textContent = hu;
+            healthOverallValue.textContent = overall;
+
+            hsCustomersBar.style.width = hc + '%';
+            hsCrmBar.style.width = hcrm + '%';
+            hsUsageBar.style.width = hu + '%';
+            hsOverallBar.style.width = overall + '%';
+
+            const mrrScaled = clamp(Math.round((customer.mrr || 0) / 200), 0, 100);
+            const smart = clamp(Math.round(overall * 0.75 + mrrScaled * 0.25), 0, 100);
+            smartScoreValue.textContent = smart;
+            smartScoreBar.style.width = smart + '%';
+            smartScoreHint.textContent =
+                smart >= 80 ? 'Strong signals: high usage + stable revenue.' :
+                smart >= 55 ? 'Mixed signals: monitor support + onboarding friction.' :
+                'Risk signals: prioritize retention actions this week.';
+
+            loadCustomerRecommendations();
+            loadCustomerActivities();
+        }
+
+        function loadCustomerRecommendations() {
+            const container = document.getElementById('recommendationsTab');
+            const customer = customers[currentCustomer];
+            if (!customer) return;
+
+            container.innerHTML = '';
+            customer.recommendations.forEach(rec => {
+                const pr = rec.priority || 'medium';
+                const prCls = pr === 'high' ?
+                    'bg-danger/15 text-danger border-danger/30' :
+                    pr === 'low' ?
+                    'bg-zinc-100 text-zinc-600 border-zinc-200' :
+                    'bg-warning/15 text-warning border-warning/30';
+
+                const div = document.createElement('div');
+                div.className = 'p-4 border border-zinc-200 rounded-lg';
+                div.innerHTML = `
+          <div class="flex items-start gap-3">
+            <div class="h-10 w-10 rounded-lg bg-secondary/20 flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-lightbulb text-secondary"></i>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-start justify-between gap-2">
+                <h5 class="font-semibold mb-1 truncate">${escapeHtml(rec.title)}</h5>
+                <span class="text-[10px] px-2 py-1 rounded-full border ${prCls} font-semibold">
+                  ${escapeHtml(pr.toUpperCase())}
+                </span>
+              </div>
+              <p class="text-sm text-zinc-600">${escapeHtml(rec.description)}</p>
+              <button class="mt-2 text-sm text-secondary font-medium hover:underline">Take action</button>
+            </div>
+          </div>
+        `;
+                container.appendChild(div);
+            });
+        }
+
+        function loadCustomerActivities() {
+            const container = document.getElementById('customerActivities');
+            const customer = customers[currentCustomer];
+            if (!customer) return;
+
+            container.innerHTML = '';
+            customer.activities.forEach(activity => {
+                const div = document.createElement('div');
+                div.className = 'p-4 border border-zinc-200 rounded-lg';
+                div.innerHTML = `
+          <div class="flex items-start gap-3">
+            <div class="h-10 w-10 rounded-full ${activity.type === 'call' ? 'bg-blue-100 text-blue-600' : activity.type === 'meeting' ? 'bg-purple-100 text-purple-600' : 'bg-green-100 text-green-600'} flex items-center justify-center flex-shrink-0">
+              <i class="${activity.type === 'call' ? 'fas fa-phone' : activity.type === 'meeting' ? 'fas fa-users' : 'fas fa-envelope'}"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex justify-between items-start gap-2">
+                <div class="min-w-0">
+                  <h5 class="font-semibold mb-1 truncate">${escapeHtml(activity.title)}</h5>
+                  <div class="text-sm text-zinc-600 mb-2 truncate">${escapeHtml(activity.date)}</div>
+                </div>
+                <span class="text-[10px] px-2 py-1 rounded-full font-semibold ${activity.priority === 'high' ? 'bg-danger/15 text-danger' : 'bg-warning/15 text-warning'}">
+                  ${escapeHtml(activity.priority.toUpperCase())}
+                </span>
+              </div>
+
+              <div class="mb-3">
+                <div class="text-xs text-zinc-500 mb-1">Participants:</div>
+                <div class="flex -space-x-2">
+                  ${activity.participants.map((p, i) => `
+                    <div class="h-8 w-8 rounded-full border-2 border-white bg-gradient-to-br ${i === 0 ? 'from-blue-500 to-blue-700' : i === 1 ? 'from-purple-500 to-pink-500' : 'from-green-500 to-teal-500'} flex items-center justify-center text-white text-xs font-bold">
+                      ${escapeHtml(p.split(' ').map(n => n[0]).join(''))}
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+
+              <div class="flex gap-2">
+                <button class="activity-start-btn flex-1 bg-primary hover:bg-yellow-500 text-zinc-900 font-medium py-2 rounded-lg transition flex items-center justify-center gap-2" data-id="${activity.id}">
+                  <i class="fas fa-play"></i> ${activity.type === 'call' ? 'Start Call' : activity.type === 'meeting' ? 'Start Meeting' : 'Compose Email'}
+                </button>
+                <button class="flex-1 border border-zinc-300 hover:bg-zinc-50 font-medium py-2 rounded-lg transition">
+                  <i class="far fa-edit mr-1"></i> Add Notes
+                </button>
+              </div>
+
+              ${customers[currentCustomer].meetingRecords.length ? `
+                <div class="mt-3 flex items-center justify-between p-2 rounded-lg bg-zinc-50 border border-zinc-200">
+                  <div class="text-xs text-zinc-600 flex items-center gap-2">
+                    <i class="fas fa-wand-magic-sparkles text-secondary"></i>
+                    You have a saved transcript (summary may still be processing).
+                  </div>
+                  <button class="text-xs font-semibold text-secondary hover:underline open-meeting-workspace">
+                    Open post-call tools →
+                  </button>
+                </div>` : ''}
+            </div>
+          </div>
+        `;
+                container.appendChild(div);
+
+                div.querySelector('.activity-start-btn').addEventListener('click', () => {
+                    if (activity.type === 'call' || activity.type === 'meeting') startMeeting();
+                });
+
+                const openBtn = div.querySelector('.open-meeting-workspace');
+                if (openBtn) {
+                    openBtn.addEventListener('click', () => {
+                        const rec = customers[currentCustomer].meetingRecords[0];
+                        if (rec) {
+                            lastSavedMeeting = rec;
+                            showMeetingWorkspace(rec, 'summary');
+                            setRightPanelSize('half');
+                        }
+                    });
+                }
+            });
+
+            if (customers[currentCustomer].meetingRecords.length) hideMeetingWorkspace.classList.remove('hidden');
+        }
+
+        // Meeting modal simulation
+        function startMeeting() {
+            meetingModal.classList.remove('hidden');
+            meetingActive = true;
+            meetingSeconds = 1;
+            meetingTimer.textContent = formatHMS(meetingSeconds);
+
+            meetingTranscript.innerHTML = `
+        <div class="flex gap-2"><div class="font-medium">Alex:</div><div>Hi everyone — agenda: pilot scope, success metrics, support SLAs, and renewal timeline.</div></div>
+        <div class="flex gap-2"><div class="font-medium">Sarah:</div><div>Perfect. We also want clear next steps and no surprises close to renewal.</div></div>
+        <div class="flex gap-2"><div class="font-medium">Michael:</div><div>We’d like to start with ~25 users for the pilot, then scale if it performs.</div></div>
+      `;
+
+            clearInterval(meetingInterval);
+
+            let tick = 0;
+            meetingInterval = setInterval(() => {
+                tick++;
+                meetingSeconds++;
+                meetingTimer.textContent = formatHMS(meetingSeconds);
+
+                if (tick === 5) {
+                    meetingSeconds = 3600;
+                    meetingTimer.textContent = formatHMS(meetingSeconds);
+
+                    const longLines = [
+                        ["Alex:", "Current usage is steady overall, but EU weekly active users dipped slightly."],
+                        ["Sarah:", "We saw friction in onboarding steps 2 and 3—some users stall there."],
+                        ["Alex:", "For the pilot, we’ll focus on: onboarding clarity, dashboard speed, and reporting adoption."],
+                        ["Michael:", "Success metrics: +10% WAU, at least 3 champions, and improved reporting usage."],
+                        ["Alex:", "Agreed. We’ll track activation → adoption → habit signals weekly."],
+                        ["Sarah:", "Support: three urgent tickets last month. Can we confirm SLA expectations?"],
+                        ["Alex:", "We’ll propose a premium support option and share ETAs for open issues."],
+                        ["Michael:", "Pricing: if we add ~300 seats, can we get volume tiers or an annual discount?"],
+                        ["Alex:", "Yes. I’ll prepare tiered vs flat options, plus annual-commit discount scenarios."],
+                        ["Sarah:", "Timeline: can we start next Tuesday?"],
+                        ["Alex:", "Yes. Test environment by Monday; kickoff Tuesday; weekly check-in cadence."],
+                        ["Michael:", "Also include security review notes and data retention policy."],
+                        ["Alex:", "Will do—plus compliance docs and SSO requirements confirmation."],
+                        ["Sarah:", "Renewal is about 45 days out. We want alignment early."],
+                        ["Alex:", "Understood. I’ll send a follow-up email today: pilot plan, pricing options, and support ETA."]
+                    ];
+                    longLines.forEach(([s, t]) => addTranscriptLine(s, t));
+                }
+
+                if (tick > 5 && tick % 4 === 0 && tick <= 17) addTranscriptLine("System:", "…capturing additional discussion…");
+            }, 1000);
+        }
+
+        function formatHMS(totalSeconds) {
+            const h = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
+            const m = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
+            const s = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
+            return `${h}:${m}:${s}`;
+        }
+
+        function addTranscriptLine(speaker, text) {
+            const line = document.createElement('div');
+            line.className = 'flex gap-2';
+            line.innerHTML = `<div class="font-medium">${escapeHtml(speaker)}</div><div>${escapeHtml(text)}</div>`;
+            meetingTranscript.appendChild(line);
+            meetingTranscript.scrollTop = meetingTranscript.scrollHeight;
+        }
+
+        // Meeting Workspace + Summary
+        function showMeetingWorkspace(record, defaultTab = 'summary') {
+            meetingWorkspace.classList.remove('hidden');
+            hideMeetingWorkspace.classList.remove('hidden');
+
+            const upcoming = customers[currentCustomer].activities.filter(a => a.type === 'call' || a.type === 'meeting').slice(0, 4);
+            upcomingMeetingsList.innerHTML = '';
+            upcoming.forEach(a => {
+                const row = document.createElement('div');
+                row.className = 'p-3 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50';
+                row.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="min-w-0">
+              <div class="font-medium text-sm truncate">${escapeHtml(a.title)}</div>
+              <div class="text-xs text-zinc-500"><i class="far fa-clock"></i> ${escapeHtml(a.date)}</div>
+            </div>
+            <span class="text-[10px] px-2 py-1 rounded-full font-semibold ${a.priority === 'high' ? 'bg-danger/15 text-danger' : 'bg-warning/15 text-warning'}">${escapeHtml(a.priority.toUpperCase())}</span>
+          </div>
+        `;
+                upcomingMeetingsList.appendChild(row);
+            });
+
+            summaryTitle.textContent = record.title || "Meeting";
+
+            if (!record.summaryReady) {
+                summaryProcessing.classList.remove('hidden');
+                summaryBody.classList.add('hidden');
+                summaryProcessingBar.style.width = '15%';
+                summaryBody.innerHTML = '';
+            } else {
+                summaryProcessing.classList.add('hidden');
+                summaryBody.classList.remove('hidden');
+                summaryBody.innerHTML = renderSummaryHtml(record.summary);
+            }
+
+            savedTranscriptView.textContent = record.transcript || '';
+            meetingNotes.value = record.notes || '';
+
+            switchMeetingTab(defaultTab);
+            lastSavedMeeting = record;
+        }
+
+        function runSummaryProcessing(record) {
+            summaryProcessing.classList.remove('hidden');
+            summaryBody.classList.add('hidden');
+            summaryProcessingBar.style.width = '15%';
+
+            let pct = 15;
+            const step = setInterval(() => {
+                pct = Math.min(95, pct + 8);
+                summaryProcessingBar.style.width = pct + '%';
+            }, 400);
+
+            setTimeout(() => {
+                clearInterval(step);
+                record.summaryReady = true;
+
+                summaryProcessing.classList.add('hidden');
+                summaryBody.classList.remove('hidden');
+                summaryBody.innerHTML = renderSummaryHtml(record.summary);
+
+                const msg = `
+          ✅ <strong>Transcript summary ready</strong> for <strong>${escapeHtml(currentCustomer)}</strong>.<br><br>
+          <div class="bg-zinc-50 border border-zinc-200 rounded-lg p-3">
+            ${renderSummaryHtml(record.summary)}
+          </div>
+          <div class="mt-3">
+            <div class="font-semibold">Next best actions</div>
+            <div class="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button data-nba="email" class="text-left p-3 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50">
+                <div class="text-xs text-zinc-500 flex items-center gap-2"><i class="fas fa-envelope text-secondary"></i> Action</div>
+                <div class="font-semibold mt-1">Generate follow-up email</div>
+                <div class="text-xs text-zinc-500 mt-1">Draft to meeting participants</div>
+              </button>
+              <button data-nba="pilot" class="text-left p-3 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50">
+                <div class="text-xs text-zinc-500 flex items-center gap-2"><i class="fas fa-flag-checkered text-success"></i> Action</div>
+                <div class="font-semibold mt-1">Create pilot plan</div>
+                <div class="text-xs text-zinc-500 mt-1">Scope, metrics, timeline</div>
+              </button>
+              <button data-nba="pricing" class="text-left p-3 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50">
+                <div class="text-xs text-zinc-500 flex items-center gap-2"><i class="fas fa-tag text-warning"></i> Action</div>
+                <div class="font-semibold mt-1">Draft pricing options</div>
+                <div class="text-xs text-zinc-500 mt-1">Tiers + annual discount</div>
+              </button>
+            </div>
+          </div>
+        `;
+                addAIMessage(msg, true);
+            }, 5000);
+        }
+
+        function switchMeetingTab(tab) {
+            document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.mtab-panel').forEach(p => p.classList.add('hidden'));
+
+            const btn = document.querySelector(`.seg-btn[data-mtab="${tab}"]`);
+            const panel = document.getElementById(`mtab_${tab}`);
+            if (btn) btn.classList.add('active');
+            if (panel) panel.classList.remove('hidden');
+        }
+
+        function renderSummaryHtml(summary) {
+            return `
+        <div class="text-sm">
+          <div class="font-semibold">Key outcomes</div>
+          <ul class="list-disc ml-5 mt-1 text-zinc-700">
+            ${(summary?.bullets || []).map(b => `<li>${escapeHtml(b)}</li>`).join('')}
+          </ul>
+          <div class="mt-3">
+            <div class="font-semibold">Next steps</div>
+            <ul class="list-disc ml-5 mt-1 text-zinc-700">
+              ${(summary?.nextSteps || []).map(s => `<li>${escapeHtml(s)}</li>`).join('')}
+            </ul>
+          </div>
+        </div>
+      `;
+        }
+
+        // Email draft
+        function buildFollowupEmailDraft(record, customerName) {
+            const toEmails = record.toEmails || [];
+            const toNames = (record.participants || []).join(', ');
+            const subject = `Follow-up: ${record.title} (${customerName})`;
+
+            const body =
+                `Hi ${toNames},
+
+Thanks again for your time today.
+
+Here’s a quick recap of what we agreed:
+- ${record.summary.bullets.join('\\n- ')}
+
+Next steps:
+- ${record.summary.nextSteps.join('\\n- ')}
+
+If anything looks off, reply here and I’ll adjust.
+
+Best regards,
+Alex`;
+
+            const mailto = makeMailtoLink(toEmails.join(','), subject, body);
+            return {
+                toEmails,
+                subject,
+                body,
+                mailto
+            };
+        }
+
+        function makeMailtoLink(to, subject, body) {
+            const enc = (s) => encodeURIComponent(s);
+            return `mailto:${enc(to)}?subject=${enc(subject)}&body=${enc(body)}`;
+        }
+
+        // Transcript + summary helpers
+        function collectTranscriptText() {
+            const lines = Array.from(meetingTranscript.querySelectorAll('.flex.gap-2'))
+                .map(row => {
+                    const parts = row.querySelectorAll('div');
+                    if (parts.length >= 2) return `${parts[0].innerText.trim()} ${parts[1].innerText.trim()}`;
+                    return row.innerText.trim();
+                });
+            return lines.join('\n');
+        }
+
+        function generateSummaryFromTranscript(_, customerName) {
+            return {
+                bullets: [
+                    `Aligned on a pilot for the new dashboard with a subset of users and clear success metrics.`,
+                    `Discussed support SLAs, open tickets, and renewal timing to avoid surprises.`,
+                    `Agreed to prepare pricing options for expansion (seat increase) and confirm compliance needs.`
+                ],
+                nextSteps: [
+                    `Send pilot plan + timeline to ${customerName}.`,
+                    `Share pricing options + proposal for expansion/tiers.`,
+                    `Provide support ticket ETA + compliance/security documentation.`
+                ]
+            };
+        }
+
+        function findCurrentCallTitle(customerName) {
+            const c = customers[customerName];
+            const call = c.activities.find(a => a.type === 'call') || c.activities[0];
+            return call ? call.title : 'Customer Call';
+        }
+
+        function findMeetingById(id) {
+            for (const k of Object.keys(customers)) {
+                const hit = customers[k].meetingRecords.find(r => r.id === id);
+                if (hit) return hit;
+            }
+            return null;
+        }
+
+        function handleUpcomingActivities(message) {
+            let customerMatch = 'XYZ Corporation';
+            if (message.toLowerCase().includes('apple')) customerMatch = 'Apple';
+
+            if (customers[customerMatch]) {
+                currentCustomer = customerMatch;
+                customerSelect.value = currentCustomer;
+                loadCustomerDetails();
+            }
+
+            const customer = customers[customerMatch];
+            addAIMessage(`Here are 3 high-priority upcoming activities for <strong>${escapeHtml(customerMatch)}</strong>:`);
+
+            const activityList = document.createElement('div');
+            activityList.className = 'mt-4 space-y-3';
+
+            customer.activities.slice(0, 3).forEach(activity => {
+                const activityDiv = document.createElement('div');
+                activityDiv.className = 'p-3 border border-zinc-200 rounded-lg hover:bg-zinc-50 cursor-pointer';
+                activityDiv.innerHTML = `
+          <div class="flex justify-between items-start gap-3">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-[10px] px-2 py-1 rounded-full font-semibold ${activity.priority === 'high' ? 'bg-danger/15 text-danger' : 'bg-warning/15 text-warning'}">${escapeHtml(activity.priority.toUpperCase())}</span>
+                <span class="font-medium truncate">${escapeHtml(activity.title)}</span>
+              </div>
+              <div class="text-sm text-zinc-600 flex items-center gap-2">
+                <i class="far fa-calendar"></i> ${escapeHtml(activity.date)}
+              </div>
+            </div>
+            <a href="#" class="text-secondary text-sm font-medium view-more-link shrink-0" data-customer="${escapeHtml(customerMatch)}">
+              View more →
+            </a>
+          </div>
+        `;
+                activityList.appendChild(activityDiv);
+            });
+
+            const aiMessageDiv = document.querySelector('.chat-message-ai:last-child');
+            aiMessageDiv.appendChild(activityList);
+
+            setTimeout(() => {
+                document.querySelectorAll('.view-more-link').forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const customerName = this.getAttribute('data-customer');
+                        currentCustomer = customerName;
+                        customerSelect.value = currentCustomer;
+                        loadCustomerDetails();
+
+                        openRightPanel();
+                        setRightPanelSize('half');
+                        document.querySelector('[data-tab="activities"]').click();
+
+                        const rec = customers[currentCustomer].meetingRecords[0];
+                        if (rec) showMeetingWorkspace(rec, 'upcoming');
+                    });
+                });
+            }, 50);
+
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Dashboard widgets (demo)
+        function buildWidgetsFromPrompt(prompt, context) {
+            const promptTag = prompt.slice(0, 42) + (prompt.length > 42 ? "…" : "");
+
+            if (context === 'ALL') {
+                const names = Object.keys(customers);
+                const totalMrr = names.reduce((sum, n) => sum + (customers[n].mrr || 0), 0);
+                const avgHealth = Math.round(names.reduce((sum, n) => {
+                    const h = customers[n].health || {
+                        customers: 0,
+                        crm: 0,
+                        usage: 0
+                    };
+                    return sum + ((h.customers + h.crm + h.usage) / 3);
+                }, 0) / Math.max(1, names.length));
+
+                const base = [{
+                        title: "Total MRR",
+                        subtitle: "All customers",
+                        metric: formatMoney(totalMrr),
+                        body: "Portfolio-level recurring revenue snapshot. (Demo widget)",
+                        foot: "Updated just now"
+                    },
+                    {
+                        title: "Portfolio health",
+                        subtitle: "Average",
+                        metric: avgHealth + "/100",
+                        body: "Average health across customer base. (Demo widget)",
+                        foot: "Last 30 days"
+                    },
+                    {
+                        title: "Churn watchlist",
+                        subtitle: "Signals",
+                        metric: "2",
+                        body: "2 accounts show risk signals (usage dip + tickets). (Demo widget)",
+                        foot: "Needs review"
+                    }
+                ];
+
+                return base.map(w => widgetCard(w, promptTag));
+            }
+
+            const c = customers[context];
+            const mrr = c?.mrr || 0;
+            const h = c?.health || {
+                customers: 0,
+                crm: 0,
+                usage: 0
+            };
+            const overall = Math.round((h.customers + h.crm + h.usage) / 3);
+
+            const base = [{
+                    title: "Revenue trend",
+                    subtitle: context,
+                    metric: formatMoney(mrr),
+                    body: "MRR stable with slight upward trend. (Demo widget)",
+                    foot: "Last 30 days"
+                },
+                {
+                    title: "Health signals",
+                    subtitle: "Overall",
+                    metric: overall + "/100",
+                    body: "Health driven by usage + CRM engagement. (Demo widget)",
+                    foot: "Updated just now"
+                },
+                {
+                    title: "Adoption",
+                    subtitle: "Usage",
+                    metric: (h.usage || 0) + "/100",
+                    body: "Usage score indicates feature adoption strength. (Demo widget)",
+                    foot: "Weekly active users"
+                }
+            ];
+
+            return base.map(w => widgetCard(w, promptTag));
+        }
+
+        function widgetCard(w, promptTag) {
+            const card = document.createElement('div');
+            card.className = 'p-4 rounded-2xl border border-zinc-200 bg-gradient-to-br from-white to-zinc-50';
+            card.innerHTML = `
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <div class="font-semibold">${escapeHtml(w.title)}</div>
+            <div class="text-xs text-zinc-500 mt-1">${escapeHtml(w.subtitle)} • Prompt: “${escapeHtml(promptTag)}”</div>
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-zinc-500">Metric</div>
+            <div class="font-black text-lg">${escapeHtml(String(w.metric))}</div>
+          </div>
+        </div>
+        <div class="mt-3 text-sm text-zinc-700">${escapeHtml(w.body)}</div>
+        <div class="mt-3 flex items-center justify-between text-xs text-zinc-500">
+          <span>${escapeHtml(w.foot)}</span>
+          <button class="text-secondary font-medium hover:underline" onclick="document.getElementById('backToChatBtn')?.click();">Ask AI</button>
+        </div>
+      `;
+            return card;
+        }
+
+        // Utils
+        function escapeHtml(str) {
+            return String(str)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", "&#039;");
+        }
+
+        function clamp(n, a, b) {
+            return Math.max(a, Math.min(b, n));
+        }
+
+        function formatMoney(n) {
+            const v = Number(n || 0);
+            return '$' + v.toLocaleString(undefined, {
+                maximumFractionDigits: 0
+            });
+        }
+    </script>
+</body>
+
+</html>
